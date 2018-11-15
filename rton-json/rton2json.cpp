@@ -279,7 +279,7 @@ nlohmann::json json_decode(){
                 temp[buffer] = 0;
 
                 ///push to prev_stack and write json
-                debug << "prev_stack " << showbase << prev_stack.size() << ":\t" << temp << endl;
+                debug << "prev_stack[" << showbase << prev_stack.size() << "] = " << temp << endl;
                 prev_stack.push_back(temp);
                 if (key.size() > 0) push_array_mode(res, key, prev_stack[prev_stack.size() - 1], array_mode);
                 else key = temp;
