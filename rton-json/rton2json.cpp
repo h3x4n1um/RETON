@@ -4,10 +4,6 @@
 
 using namespace std;
 
-constexpr double log256(double x){
-    return log2(x) / 8;
-}
-
 extern ifstream input;
 extern ofstream debug;
 vector <string> prev_stack;
