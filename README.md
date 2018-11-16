@@ -1,6 +1,6 @@
 # RETON: Reverse Engineering RTON (RE RTON -> RETON)
 ## Basic
-* RTON file is a serialize type that very similar to JSON but it use byte code.
+* RTON file is a serialize type that very similar to JSON but it use bytecode.
 
 * RTON file begin with `52 54 4F 4E` (`RTON` in ASCII) follow by 4-byte little-endian indicate version of RTON (usually `01 00 00 00`) and end with `44 4F 4E 45` (`DONE` in ASCII).
 
@@ -99,17 +99,17 @@
 
 ## String (`81` and `82`)
 ### `81`
-* `81 xx [string]` create a `[string]` that has EXACTLY `xx` bytes.
+* `81 xx [string]` create a `[string]` that has EXACTLY `xx` **unsigned RTON number** of bytes.
 
 ### `82`
-* `82 [L1] [L2] [string]` where `[L1]` = `[L2]` = length of `[string]`.
+* `82 [L1] [L2] [string]` where `[L1]` = `[L2]` = **unsigned RTON number** length of `[string]`.
 
 ## RTID (`83 03`)
 * `83 03` begin the RTID (RTON ID???) of RTON (cross-reference???).
 
 * It has 2 strings after the RTID: `RTID(2nd_string@1st_string)`.
 
-* After `83 03` is 2 strings format: `[L1] [L2] [string]` where `[L1]` = `[L2]` = length of `[string]`.
+* After `83 03` is 2 strings format: `[L1] [L2] [string]` where `[L1]` = `[L2]` = **unsigned RTON number** length of `[string]`.
 
 * Example:
     ```
@@ -194,9 +194,9 @@
     ```
 
 ## Substitute (`90` and `91`)
-* `90 xx [string]` create a `[string]` that has EXACTLY `xx` bytes.
+* `90 xx [string]` create a `[string]` that has EXACTLY `xx` **unsigned RTON number** of bytes.
 
-* By using `90`, the string will push in a stack then it can be recalled by `91 xx` to call the `xx`th in the stack (`xx` starting from 0). Let's call the stack is PREV.
+* By using `90`, the string will push in a stack then it can be recalled by `91 xx` to call the `xx` **unsigned RTON number** element in the stack (`xx` starting from 0). Let's call the stack is PREV.
 
 * Example: the following dump contain 2 objects:
     ```

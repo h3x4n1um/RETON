@@ -121,8 +121,7 @@ json read_block_RTON(){
         }
         ///unsigned RTON number
         case 0x24:{
-            uint64_t num = unsigned_RTON_num2int(read_RTON_num());
-            res.push_back(num);
+            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
         ///signed RTON number
@@ -147,8 +146,7 @@ json read_block_RTON(){
         }
         ///unsigned RTON number???
         case 0x28:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            res.push_back(num);
+            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
         ///0.0???
@@ -165,8 +163,7 @@ json read_block_RTON(){
         }
         ///unsigned RTON number???
         case 0x44:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            res.push_back(num);
+            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
         ///signed RTON number???
@@ -180,8 +177,7 @@ json read_block_RTON(){
         ///string
         case 0x81:{
             ///get buffer
-            uint8_t buffer;
-            input.read(reinterpret_cast <char *> (&buffer), sizeof buffer);
+            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
 
             ///read buffer
             char temp[buffer + 1];
@@ -192,11 +188,10 @@ json read_block_RTON(){
         }
         case 0x82:{
             ///get string buffer
-            uint16_t s_buffer;
+            uint64_t s_buffer = unsigned_RTON_num2int(read_RTON_num());
+            uint64_t s_buffer_check = unsigned_RTON_num2int(read_RTON_num());
             char * s;
-            input.read(reinterpret_cast <char * > (&s_buffer), sizeof s_buffer);
-            if (s_buffer / 0x100 == s_buffer % 0x100){
-                s_buffer /= 0x100;
+            if (s_buffer == s_buffer_check){
                 s = new char [s_buffer + 1];
                 input.read(s, s_buffer);
                 s[s_buffer] = 0;
@@ -212,22 +207,20 @@ json read_block_RTON(){
             ///check for 03
             if (check == 0x3){
                 ///get 1st string
-                uint16_t s1_buffer;
+                uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
+                uint64_t s1_buffer_check = unsigned_RTON_num2int(read_RTON_num());
                 char * s1;
-                input.read(reinterpret_cast <char * > (&s1_buffer), sizeof s1_buffer);
-                if (s1_buffer / 0x100 == s1_buffer % 0x100){
-                    s1_buffer /= 0x100;
+                if (s1_buffer == s1_buffer_check){
                     s1 = new char [s1_buffer + 1];
                     input.read(s1, s1_buffer);
                     s1[s1_buffer] = 0;
                 }
                 else bytecode_error();
                 ///get 2nd string
-                uint16_t s2_buffer;
+                uint64_t s2_buffer = unsigned_RTON_num2int(read_RTON_num());
+                uint64_t s2_buffer_check = unsigned_RTON_num2int(read_RTON_num());
                 char * s2;
-                input.read(reinterpret_cast <char * > (&s2_buffer), sizeof s2_buffer);
-                if (s2_buffer / 0x100 == s2_buffer % 0x100){
-                    s2_buffer /= 0x100;
+                if (s2_buffer == s2_buffer_check){
                     s2 = new char [s2_buffer + 1];
                     input.read(s2, s2_buffer);
                     s2[s2_buffer] = 0;
@@ -258,6 +251,7 @@ json read_block_RTON(){
                 json arr = json::array();
                 for (int i = 0; i < num_elements; ++i) arr.push_back(read_block_RTON()[0]);
                 res.push_back(arr);
+                ///check end of array
                 uint8_t check_end;
                 input.read(reinterpret_cast <char *> (&check_end), sizeof check_end);
                 if (check_end != 0xfe) bytecode_error();
@@ -268,8 +262,7 @@ json read_block_RTON(){
         ///substitute
         case 0x90:{
             ///get buffer
-            uint8_t buffer;
-            input.read(reinterpret_cast <char *> (&buffer), sizeof buffer);
+            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
 
             ///read buffer
             char temp[buffer + 1];
@@ -283,11 +276,8 @@ json read_block_RTON(){
             break;
         }
         case 0x91:{
-            ///get pos
-            uint64_t pos = unsigned_RTON_num2int(read_RTON_num());
-
             ///substitute
-            res.push_back(prev_stack[pos]);
+            res.push_back(prev_stack[unsigned_RTON_num2int(read_RTON_num())]);
             break;
         }
         ///end of object
