@@ -10,7 +10,7 @@ vector <string> prev_stack;
 
 void byte_code_error(int pos);
 
-uint64_t RTON_num2int(vector <uint8_t> q){
+uint64_t unsigned_RTON_num2int(vector <uint8_t> q){
     if (q.size() == 1){
         if (q[0] > 0x7f) return UINT_MAX; //return max when RTON number has 1 byte and > 0x7f
         else return q[0];
@@ -125,15 +125,15 @@ nlohmann::json json_decode(){
                 push_array_mode(res, key, 0.0, array_mode);
                 break;
             }
-            ///RTON number
+            ///unsigned RTON number
             case 0x24:{
-                uint64_t num = RTON_num2int(read_RTON_num());
+                uint64_t num = unsigned_RTON_num2int(read_RTON_num());
                 push_array_mode(res, key, num, array_mode);
                 break;
             }
             ///signed RTON number
             case 0x25:{
-                int64_t num = RTON_num2int(read_RTON_num());
+                int64_t num = unsigned_RTON_num2int(read_RTON_num());
                 if (num % 2 == 0) num /= -2;
                 else num /= 2;
                 push_array_mode(res, key, num, array_mode);
@@ -151,9 +151,9 @@ nlohmann::json json_decode(){
                 push_array_mode(res, key, 0, array_mode);
                 break;
             }
-            ///RTON number???
+            ///unsigned RTON number???
             case 0x28:{
-                int64_t num = RTON_num2int(read_RTON_num());
+                int64_t num = unsigned_RTON_num2int(read_RTON_num());
                 push_array_mode(res, key, num, array_mode);
                 break;
             }
@@ -169,15 +169,15 @@ nlohmann::json json_decode(){
                 push_array_mode(res, key, num, array_mode);
                 break;
             }
-            ///RTON number???
+            ///unsigned RTON number???
             case 0x44:{
-                int64_t num = RTON_num2int(read_RTON_num());
+                int64_t num = unsigned_RTON_num2int(read_RTON_num());
                 push_array_mode(res, key, num, array_mode);
                 break;
             }
             ///signed RTON number???
             case 0x45:{
-                int64_t num = RTON_num2int(read_RTON_num());
+                int64_t num = unsigned_RTON_num2int(read_RTON_num());
                 if (num % 2 == 0) num /= -2;
                 else num /= 2;
                 push_array_mode(res, key, num, array_mode);
@@ -260,7 +260,7 @@ nlohmann::json json_decode(){
                 uint8_t check;
                 input.read(reinterpret_cast <char *> (&check), sizeof check);
                 if (check == 0xfd){
-                    RTON_num2int(read_RTON_num());
+                    unsigned_RTON_num2int(read_RTON_num());
                     array_mode = true;
                     res[key] = nlohmann::json::array();
                 }
@@ -287,7 +287,7 @@ nlohmann::json json_decode(){
             }
             case 0x91:{
                 ///get pos
-                uint64_t pos = RTON_num2int(read_RTON_num());
+                uint64_t pos = unsigned_RTON_num2int(read_RTON_num());
 
                 ///substitute
                 if (key.size() > 0) push_array_mode(res, key, prev_stack[pos], array_mode);

@@ -68,7 +68,7 @@ int main(const int argc, const char * argv[]){
     }
     ///json2rton
     else if (strcmp(argv[1], "-json2rton") == 0){
-        printf("To be implemented");
+        puts("To be implemented");
         return 1;
     }
     ///else
