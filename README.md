@@ -92,7 +92,7 @@
 * Pseudocode:
     ```cpp
     signed_RTON_number = unsigned_RTON_number;
-    if (signed_RTON_number % 2 == 0) signed_RTON_number /= -2;
+    if (signed_RTON_number % 2 == 1) signed_RTON_number = (signed_RTON_number + 1) / -2;
     else signed_RTON_number /= 2;
     ```
 

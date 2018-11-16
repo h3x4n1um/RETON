@@ -1,13 +1,19 @@
-///TODO: replace std::map with nlohmann::fifo_map in json.hpp
-
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+
 #include "json.hpp"
+#include "fifo_map.hpp"
 
 using namespace std;
+/// A workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
+/// https://github.com/nlohmann/json/issues/485
+template<class K, class V, class dummy_compare, class A>
+using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
+using json = nlohmann::basic_json<workaround_fifo_map>;
 
-nlohmann::json json_decode();
+json read_block_RTON();
+json json_decode();
 string rton_encode();
 
 ifstream input;
@@ -29,7 +35,7 @@ int not_RTON(){
 }
 
 int main(const int argc, const char * argv[]){
-    puts("\nrton-json made by H3x4n1um version 1.0.0");
+    puts("\nrton-json made by H3x4n1um version 1.1.0");
     puts("Credits: nlohmann for his awesome JSON parser\n");
 
     if (argc != 3) return help(argv);
