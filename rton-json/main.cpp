@@ -35,8 +35,8 @@ int not_RTON(){
 }
 
 int main(const int argc, const char * argv[]){
-    puts("\nrton-json made by H3x4n1um version 1.1.0");
-    puts("Credits: nlohmann for his awesome JSON parser\n");
+    puts("\nrton-json made by H3x4n1um version 1.1.1");
+    puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc != 3) return help(argv);
     ///rton2json
@@ -58,7 +58,7 @@ int main(const int argc, const char * argv[]){
         if (strcmp(header, "RTON") != 0) return not_RTON();
         uint32_t RTON_ver;
         input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
-        cout << "RTON version: " << RTON_ver << endl;
+        cout << header << " version: " << RTON_ver << endl;
 
         ///Write
         debug.open(file_path + ".log");
