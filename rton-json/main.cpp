@@ -37,14 +37,14 @@ int not_RTON(){
 }
 
 int main(const int argc, const char * argv[]){
-    puts("\nrton-json made by H3x4n1um version 1.3.0");
+    puts("\nrton-json made by H3x4n1um version 1.1.1");
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc != 3) return help(argv);
 
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
     debug_js["Info"]["Executable"] = argv[0];
-    debug_js["Info"]["Version"] = "1.3.0";
+    debug_js["Info"]["Version"] = "1.1.1";
     debug_js["Info"]["Option"] = argv[1];
     debug_js["Info"]["File"] = argv[2];
 
