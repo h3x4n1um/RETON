@@ -19,6 +19,7 @@ string rton_encode();
 ifstream input;
 ofstream output, debug;
 string file_path;
+json debug_js;
 
 int help(const char * argv[]){
     cout << "Usage: " << argv[0] << " [option] [file_path]\n"
@@ -31,16 +32,25 @@ int help(const char * argv[]){
 
 int not_RTON(){
     cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!\n";
+    debug << setw(4) << debug_js;
     return 1;
 }
 
 int main(const int argc, const char * argv[]){
-    puts("\nrton-json made by H3x4n1um version 1.1.1");
+    puts("\nrton-json made by H3x4n1um version 1.3.0");
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc != 3) return help(argv);
+
+    debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
+    debug_js["Info"]["Executable"] = argv[0];
+    debug_js["Info"]["Version"] = "1.3.0";
+    debug_js["Info"]["Option"] = argv[1];
+    debug_js["Info"]["File"] = argv[2];
+
     ///rton2json
     if (strcmp(argv[1], "-rton2json") == 0){
+
         ///get file_path
         file_path = argv[2];
         input.open(file_path, ifstream::binary);
@@ -58,14 +68,15 @@ int main(const int argc, const char * argv[]){
         if (strcmp(header, "RTON") != 0) return not_RTON();
         uint32_t RTON_ver;
         input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
-        cout << header << " version: " << RTON_ver << endl;
+        debug_js[string(header) + " Version"] = RTON_ver;
 
         ///Write
-        debug.open(file_path + ".log");
         output.open(file_path + ".json");
+        debug.open(file_path + "_log.json");
         output << setw(4) << json_decode();
+        debug << setw(4) << debug_js;
 
-        puts("\nDone!");
+        puts("Done!");
 
         ///Close
         input.close();

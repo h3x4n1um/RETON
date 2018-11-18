@@ -1,8 +1,14 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+#include <sstream>
 
 #include "json.hpp"
 #include "fifo_map.hpp"
+
+constexpr double log256(double q){
+    return log2(q) / 8;
+}
 
 using namespace std;
 /// A workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
@@ -13,10 +19,22 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 
 extern ifstream input;
 extern ofstream debug;
+extern json debug_js;
 vector <string> prev_stack;
 
 json json_decode();
 void bytecode_error();
+
+uint64_t int2unsigned_RTON_num(uint64_t q){
+    if (q <= 0x7f) return q;
+    uint64_t first_byte = q % 0x100;
+    q /= 0x100;
+    uint64_t second_byte = q * 2;
+    if (first_byte > 0x7f) ++second_byte;
+    else first_byte += 0x80; //reverse & 0x7f
+    uint64_t new_second_byte = int2unsigned_RTON_num(second_byte);
+    return first_byte * pow(0x100, ceil(log256(new_second_byte)) ? ceil(log256(new_second_byte)) : 1) + new_second_byte;
+}
 
 uint64_t unsigned_RTON_num2int(vector <uint8_t> q){
     if (q.size() == 1){
@@ -47,12 +65,27 @@ vector <uint8_t> read_RTON_num(){
     return RTON_num;
 }
 
+string to_hex_string(uint64_t q){
+    if (q == 0) return "0x0";
+    string s;
+    stringstream ss;
+    ss << hex << showbase << q;
+    ss >> s;
+    return s;
+}
+
 json read_block_RTON(){
     uint8_t bytecode;
-    json res;
-    debug << hex << showbase << input.tellg() << endl;
-    ///split case
+    json res, log;
+    ///read bytecode
     input.read(reinterpret_cast <char *> (&bytecode), sizeof bytecode);
+    ///logging
+    log["Offset"] = to_hex_string(input.tellg() - 1);
+    debug_js["List of Bytecodes"].push_back(json::object({
+        {"Offset", to_hex_string(input.tellg() - 1)},
+        {"Bytecode", to_hex_string(bytecode)}
+    }));
+    ///split case
     switch (bytecode){
         ///false
         case 0x0:{
@@ -269,8 +302,12 @@ json read_block_RTON(){
             input.read(temp, buffer);
             temp[buffer] = 0;
 
+            ///logging
+            debug_js["0x91"].push_back(json::object({
+                {to_hex_string(int2unsigned_RTON_num(prev_stack.size())), string(temp)}
+            }));
+
             ///push to prev_stack and write json
-            debug << "prev_stack[" << showbase << prev_stack.size() << "] = " << temp << endl;
             prev_stack.push_back(temp);
             res.push_back(prev_stack[prev_stack.size() - 1]);
             break;
@@ -310,5 +347,6 @@ void bytecode_error(){
     input.seekg(input.tellg() - 1);
     input.read(reinterpret_cast <char *> (&bytecode), sizeof bytecode);
     cout << "\nERROR READING BYTECODE " << hex << showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!\n";
+    debug << setw(4) << debug_js;
     exit(1);
 }
