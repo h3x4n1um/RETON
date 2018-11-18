@@ -76,11 +76,10 @@ string to_hex_string(uint64_t q){
 
 json read_block_RTON(){
     uint8_t bytecode;
-    json res, log;
+    json res;
     ///read bytecode
     input.read(reinterpret_cast <char *> (&bytecode), sizeof bytecode);
     ///logging
-    log["Offset"] = to_hex_string(input.tellg() - 1);
     debug_js["List of Bytecodes"].push_back(json::object({
         {"Offset", to_hex_string(input.tellg() - 1)},
         {"Bytecode", to_hex_string(bytecode)}
