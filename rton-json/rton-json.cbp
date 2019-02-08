@@ -25,10 +25,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="RTON_number.h" />
 		<Unit filename="fifo_map.hpp" />
 		<Unit filename="json.hpp" />
+		<Unit filename="json2rton.cpp" />
 		<Unit filename="main.cpp" />
-		<Unit filename="numberic.h" />
 		<Unit filename="rton2json.cpp" />
 		<Extensions>
 			<code_completion />

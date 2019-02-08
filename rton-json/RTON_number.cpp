@@ -1,3 +1,8 @@
+#include <climits>
+#include <cmath>
+#include <cstdint>
+#include <vector>
+
 constexpr double log256(double q){
     return log2(q) / 8;
 }
@@ -28,13 +33,4 @@ uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q){
         q.pop_back();
     }
     return last_byte;
-}
-
-std::string to_hex_string(uint64_t q){
-    if (q == 0) return "0x0";
-    std::string s;
-    std::stringstream ss;
-    ss << std::hex << std::showbase << q;
-    ss >> s;
-    return s;
 }

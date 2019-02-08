@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "fifo_map.hpp"
 #include "json.hpp"
@@ -25,6 +26,15 @@ std::ofstream output, debug;
 std::string file_path;
 json debug_js;
 
+std::string to_hex_string(uint64_t q){
+    if (q == 0) return "0x0";
+    std::string s;
+    std::stringstream ss;
+    ss << std::hex << std::showbase << q;
+    ss >> s;
+    return s;
+}
+
 int help(const char* argv[]){
     std::cout << "Usage: " << argv[0] << " [option] [file_path]\n"
     "\n[option]:\n"
@@ -41,12 +51,7 @@ int not_RTON(){
 
 int main(const int argc, const char* argv[]){
     std::cout << "\nrton-json made by H3x4n1um version " + ver << std::endl;
-
-    //get current time
-    std::chrono::time_point <std::chrono::system_clock> current_time = std::chrono::system_clock::now();
-    time_t current_time_t = std::chrono::system_clock::to_time_t(current_time);
-    std::cout << "Compiled on " << ctime(&current_time_t);
-
+    std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc != 3) return help(argv);
@@ -54,7 +59,7 @@ int main(const int argc, const char* argv[]){
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
     debug_js["Info"]["Executable"] = argv[0];
     debug_js["Info"]["Version"] = ver;
-    debug_js["Info"]["Compile Time"] = ctime(&current_time_t);
+    debug_js["Info"]["Compile Time"] = std::string(__DATE__) + ' ' + __TIME__;
     debug_js["Info"]["Option"] = argv[1];
     debug_js["Info"]["File"] = argv[2];
 
