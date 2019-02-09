@@ -7,16 +7,20 @@ constexpr double log256(double q){
     return log2(q) / 8;
 }
 
-//TODO: make int2unsigned_RTON_num return std::vector <uint8_t>
-uint64_t int2unsigned_RTON_num(uint64_t q){
-    if (q <= 0x7f) return q;
-    uint64_t first_byte = q % 0x100;
+std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
+    std::vector <uint8_t> res;
+    if (q <= 0x7f){
+        res.push_back(q);
+        return res;
+    }
+    uint8_t temp = q % 0x100;
     q /= 0x100;
-    uint64_t second_byte = q * 2;
-    if (first_byte > 0x7f) ++second_byte;
-    else first_byte += 0x80; //reverse & 0x7f
-    uint64_t new_second_byte = int2unsigned_RTON_num(second_byte);
-    return first_byte * pow(0x100, ceil(log256(new_second_byte)) ? ceil(log256(new_second_byte)) : 1) + new_second_byte;
+    q *= 2;
+    if (temp > 0x7f) ++q;
+    else temp += 0x80; //reverse & 0x7f
+    res = int2unsigned_RTON_num(q);
+    res.insert(res.begin(), temp);
+    return res;
 }
 
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q){

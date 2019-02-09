@@ -15,7 +15,7 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const std::string ver = "2.0.0";
 
-extern json json_decode();
+extern json init_json_decode();
 extern int rton_encode();
 
 std::ifstream input;
@@ -27,6 +27,18 @@ std::string to_hex_string(uint64_t q){
     std::string s;
     std::stringstream ss;
     ss << std::hex << std::showbase << q;
+    ss >> s;
+    return s;
+}
+
+std::string to_hex_string(std::vector <uint8_t> a){
+    std::string s;
+    std::stringstream ss;
+    ss << "0x";
+    for (uint8_t i : a){
+        if (i < 0x10) ss << 0;
+        ss << std::hex << (int) i;
+    }
     ss >> s;
     return s;
 }
@@ -72,7 +84,7 @@ int main(const int argc, const char* argv[]){
         input.open(argv[2], std::ifstream::binary);
         //write
         output.open(file_name + ".json");
-        output << std::setw(4) << json_decode();
+        output << std::setw(4) << init_json_decode();
         //close
         input.close();
         output.close();

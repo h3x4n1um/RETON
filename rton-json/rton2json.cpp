@@ -13,11 +13,12 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 
 //import from main.cpp
 extern std::string to_hex_string(uint64_t q);
+extern std::string to_hex_string(std::vector <uint8_t> a);
 extern std::ifstream input;
 extern std::ofstream debug;
 extern json debug_js;
 //import from RTON_number.cpp
-extern uint64_t int2unsigned_RTON_num(uint64_t q);
+extern std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 extern uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
 std::vector <std::string> stack_0x91;
@@ -125,8 +126,8 @@ json read_RTON_block(){
         //signed RTON number
         case 0x25:{
             int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2 == 1) num = (num + 1) / -2;
-            else num /= 2;
+            if (num % 2 == 1) num = (num + 1) * -1;
+            num /= 2;
             res.push_back(num);
             break;
         }
@@ -167,8 +168,8 @@ json read_RTON_block(){
         //signed RTON number???
         case 0x45:{
             int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2 == 1) num = (num + 1) / -2;
-            else num /= 2;
+            if (num % 2 == 1) num = (num + 1) * -1;
+            num /= 2;
             res.push_back(num);
             break;
         }
@@ -285,23 +286,15 @@ json read_RTON_block(){
             break;
         }
         //else just exit error
-        default: bytecode_error();
+        default:{
+            bytecode_error();
+            break;
+        }
     }
     return res;
 }
 
 json json_decode(){
-    //check header
-    char header[5];
-    input.read(header, 4);
-    header[4] = 0;
-    if (strcmp(header, "RTON") != 0) exit(not_RTON());
-    uint32_t RTON_ver;
-    input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
-    //init RTON Stats
-    debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
-    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
-    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
     //decoding
     json res;
     while(true){
@@ -317,6 +310,22 @@ json json_decode(){
         json value = read_RTON_block()[0];
         res[key] = value;
     }
+}
+
+json init_json_decode(){
+    //check header
+    char header[5];
+    input.read(header, 4);
+    header[4] = 0;
+    if (strcmp(header, "RTON") != 0) exit(not_RTON());
+    uint32_t RTON_ver;
+    input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
+    //init RTON Stats
+    debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
+    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
+    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
+
+    return json_decode();
 }
 
 void bytecode_error(){
