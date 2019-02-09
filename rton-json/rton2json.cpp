@@ -25,6 +25,12 @@ std::vector <std::string> stack_0x91;
 json json_decode();
 void bytecode_error();
 
+int not_RTON(){
+    std::cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!\n";
+    debug << std::setw(4) << debug_js;
+    return 1;
+}
+
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
     uint8_t sub_num;
@@ -37,7 +43,7 @@ std::vector <uint8_t> read_RTON_num(){
     return RTON_num;
 }
 
-json read_block_RTON(){
+json read_RTON_block(){
     uint8_t bytecode;
     json res;
     //read bytecode
@@ -241,7 +247,7 @@ json read_block_RTON(){
             if (check == 0xfd){
                 size_t num_elements = unsigned_RTON_num2int(read_RTON_num());
                 json arr = json::array();
-                for (int i = 0; i < num_elements; ++i) arr.push_back(read_block_RTON()[0]);
+                for (int i = 0; i < num_elements; ++i) arr.push_back(read_RTON_block()[0]);
                 res.push_back(arr);
                 //check end of array
                 uint8_t check_end;
@@ -285,10 +291,22 @@ json read_block_RTON(){
 }
 
 json json_decode(){
+    //check header
+    char header[5];
+    input.read(header, 4);
+    header[4] = 0;
+    if (strcmp(header, "RTON") != 0) exit(not_RTON());
+    uint32_t RTON_ver;
+    input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
+    //init RTON Stats
+    debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
+    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
+    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
+    //decoding
     json res;
     while(true){
         std::string key;
-        json js_key = read_block_RTON();
+        json js_key = read_RTON_block();
         //TODO: check "DONE" at end of RTON file
         if (js_key.size() == 0) return res;
         else{
@@ -296,7 +314,7 @@ json json_decode(){
             key = js_key[0];
         }
         //prevent push entire array lol
-        json value = read_block_RTON()[0];
+        json value = read_RTON_block()[0];
         res[key] = value;
     }
 }

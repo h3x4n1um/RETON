@@ -7,6 +7,7 @@ constexpr double log256(double q){
     return log2(q) / 8;
 }
 
+//TODO: make int2unsigned_RTON_num return std::vector <uint8_t>
 uint64_t int2unsigned_RTON_num(uint64_t q){
     if (q <= 0x7f) return q;
     uint64_t first_byte = q % 0x100;

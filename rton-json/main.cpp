@@ -1,6 +1,4 @@
-#include <chrono>
 #include <conio.h>
-#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -17,13 +15,11 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const std::string ver = "1.1.1";
 
-json read_block_RTON();
-json json_decode();
-std::string rton_encode();
+extern json json_decode();
+extern std::string rton_encode();
 
 std::ifstream input;
 std::ofstream output, debug;
-std::string file_path;
 json debug_js;
 
 std::string to_hex_string(uint64_t q){
@@ -44,11 +40,6 @@ int help(const char* argv[]){
     return 1;
 }
 
-int not_RTON(){
-    std::cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!\n";
-    return 1;
-}
-
 int main(const int argc, const char* argv[]){
     std::cout << "\nrton-json made by H3x4n1um version " + ver << std::endl;
     std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
@@ -56,6 +47,7 @@ int main(const int argc, const char* argv[]){
 
     if (argc != 3) return help(argv);
 
+    //info
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
     debug_js["Info"]["Executable"] = argv[0];
     debug_js["Info"]["Version"] = ver;
@@ -63,42 +55,27 @@ int main(const int argc, const char* argv[]){
     debug_js["Info"]["Option"] = argv[1];
     debug_js["Info"]["File"] = argv[2];
 
+    //get file_name
+    std::string file_name;
+    file_name = argv[2];
+    for (int i = file_name.size(); i > 0; --i){
+        if (file_name[i] == '.'){
+            file_name = file_name.substr(0, i);
+            break;
+        }
+    }
+    debug.open(file_name + "_log.json");
+
     //rton2json
     if (strcmp(argv[1], "-rton2json") == 0){
-
-        //get file_path
-        file_path = argv[2];
-        input.open(file_path, std::ifstream::binary);
-        for (int i = file_path.size(); i > 0; --i){
-            if (file_path[i] == '.'){
-                file_path = file_path.substr(0, i);
-                break;
-            }
-        }
-
-        //header
-        char header[5];
-        input.read(header, 4);
-        header[4] = 0;
-        if (strcmp(header, "RTON") != 0) return not_RTON();
-        uint32_t RTON_ver;
-        input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
-
-        debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
-        debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
-        debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
-
-        //Write
-        output.open(file_path + ".json");
-        debug.open(file_path + "_log.json");
+        //read
+        input.open(argv[2], std::ifstream::binary);
+        //write
+        output.open(file_name + ".json");
         output << std::setw(4) << json_decode();
-        debug << std::setw(4) << debug_js;
-
         puts("Done!");
-
-        //Close
+        //close
         input.close();
-        debug.close();
         output.close();
     }
     //json2rton
@@ -108,5 +85,8 @@ int main(const int argc, const char* argv[]){
     }
     //else
     else return help(argv);
+    //log at the end
+    debug << std::setw(4) << debug_js;
+    debug.close();
     return 0;
 }
