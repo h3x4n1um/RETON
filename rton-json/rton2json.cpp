@@ -34,10 +34,10 @@ int not_RTON(){
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
     uint8_t sub_num;
-    input.read(reinterpret_cast <char *> (&sub_num), sizeof sub_num);
+    input.read(reinterpret_cast <char*> (&sub_num), sizeof sub_num);
     RTON_num.push_back(sub_num);
     while(sub_num > 0x7f){
-        input.read(reinterpret_cast <char *> (&sub_num), sizeof sub_num);
+        input.read(reinterpret_cast <char*> (&sub_num), sizeof sub_num);
         RTON_num.push_back(sub_num);
     }
     return RTON_num;
@@ -47,7 +47,7 @@ json read_RTON_block(){
     uint8_t bytecode;
     json res;
     //read bytecode
-    input.read(reinterpret_cast <char *> (&bytecode), sizeof bytecode);
+    input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
     //logging
     debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(input.tellg() - 1) + ": " + to_hex_string(bytecode));
     //split case
@@ -65,7 +65,7 @@ json read_RTON_block(){
         //uint8_t
         case 0xa:{
             uint8_t num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -77,7 +77,7 @@ json read_RTON_block(){
         //int16_t
         case 0x10:{
             int16_t num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -89,14 +89,14 @@ json read_RTON_block(){
         //uint16_t
         case 0x12:{
             uint16_t num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
         //int32_t
         case 0x20:{
             int32_t num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -108,7 +108,7 @@ json read_RTON_block(){
         //float32
         case 0x22:{
             float num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -133,7 +133,7 @@ json read_RTON_block(){
         //uint32_t
         case 0x26:{
             uint32_t num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -155,7 +155,7 @@ json read_RTON_block(){
         //float64
         case 0x42:{
             double num;
-            input.read(reinterpret_cast <char *> (&num), sizeof num);
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
             break;
         }
@@ -188,7 +188,7 @@ json read_RTON_block(){
             //get string buffer
             uint64_t s_buffer = unsigned_RTON_num2int(read_RTON_num());
             uint64_t s_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-            char * s;
+            char* s;
             if (s_buffer == s_buffer_check){
                 s = new char [s_buffer + 1];
                 input.read(s, s_buffer);
@@ -201,13 +201,13 @@ json read_RTON_block(){
         //RTID
         case 0x83:{
             uint8_t check;
-            input.read(reinterpret_cast <char *> (&check), sizeof check);
+            input.read(reinterpret_cast <char*> (&check), sizeof check);
             //check for 03
             if (check == 0x3){
                 //get 1st string
                 uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
                 uint64_t s1_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-                char * s1;
+                char* s1;
                 if (s1_buffer == s1_buffer_check){
                     s1 = new char [s1_buffer + 1];
                     input.read(s1, s1_buffer);
@@ -217,7 +217,7 @@ json read_RTON_block(){
                 //get 2nd string
                 uint64_t s2_buffer = unsigned_RTON_num2int(read_RTON_num());
                 uint64_t s2_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-                char * s2;
+                char* s2;
                 if (s2_buffer == s2_buffer_check){
                     s2 = new char [s2_buffer + 1];
                     input.read(s2, s2_buffer);
@@ -243,7 +243,7 @@ json read_RTON_block(){
         case 0x86:{
             //check for fd
             uint8_t check;
-            input.read(reinterpret_cast <char *> (&check), sizeof check);
+            input.read(reinterpret_cast <char*> (&check), sizeof check);
             if (check == 0xfd){
                 size_t num_elements = unsigned_RTON_num2int(read_RTON_num());
                 json arr = json::array();
@@ -251,7 +251,7 @@ json read_RTON_block(){
                 res.push_back(arr);
                 //check end of array
                 uint8_t check_end;
-                input.read(reinterpret_cast <char *> (&check_end), sizeof check_end);
+                input.read(reinterpret_cast <char*> (&check_end), sizeof check_end);
                 if (check_end != 0xfe) bytecode_error();
             }
             else bytecode_error();
@@ -322,7 +322,7 @@ json json_decode(){
 void bytecode_error(){
     uint8_t bytecode;
     input.seekg(input.tellg() - 1);
-    input.read(reinterpret_cast <char *> (&bytecode), sizeof bytecode);
+    input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
     std::cout << "\nERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!\n";
     debug << std::setw(4) << debug_js;
     exit(1);

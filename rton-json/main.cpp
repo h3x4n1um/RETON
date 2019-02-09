@@ -13,10 +13,10 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "1.1.1";
+const std::string ver = "2.0.0";
 
 extern json json_decode();
-extern std::string rton_encode();
+extern int rton_encode();
 
 std::ifstream input;
 std::ofstream output, debug;
@@ -35,7 +35,7 @@ int help(const char* argv[]){
     std::cout << "Usage: " << argv[0] << " [option] [file_path]\n"
     "\n[option]:\n"
     "\t-rton2json\tcovert RTON to JSON\n"
-    "\t-json2rton\tcovert JSON to RTON (to be implemented)\n";
+    "\t-json2rton\tcovert JSON to RTON\n";
     getch();
     return 1;
 }
@@ -73,18 +73,22 @@ int main(const int argc, const char* argv[]){
         //write
         output.open(file_name + ".json");
         output << std::setw(4) << json_decode();
-        puts("Done!");
         //close
         input.close();
         output.close();
     }
     //json2rton
     else if (strcmp(argv[1], "-json2rton") == 0){
-        puts("To be implemented");
-        return 1;
+        //read
+        input.open(argv[2]);
+        //write
+        output.open(file_name + ".rton", std::ofstream::binary);
+        rton_encode(); //write directly to file
+        output.close();
     }
     //else
     else return help(argv);
+    puts("Done!");
     //log at the end
     debug << std::setw(4) << debug_js;
     debug.close();
