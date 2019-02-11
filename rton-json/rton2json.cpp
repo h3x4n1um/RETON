@@ -1,3 +1,4 @@
+#include <conio.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -23,12 +24,13 @@ extern uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
 std::vector <std::string> stack_0x91;
 
-json json_decode();
+json read_RTON();
 void bytecode_error();
 
 int not_RTON(){
-    std::cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!\n";
+    std::cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
+    getch();
     return 1;
 }
 
@@ -237,7 +239,7 @@ json read_RTON_block(){
         }
         //sub-object
         case 0x85:{
-            res.push_back(json_decode());
+            res.push_back(read_RTON());
             break;
         }
         //array
@@ -294,7 +296,7 @@ json read_RTON_block(){
     return res;
 }
 
-json json_decode(){
+json read_RTON(){
     //decoding
     json res;
     while(true){
@@ -312,7 +314,7 @@ json json_decode(){
     }
 }
 
-json init_json_decode(){
+json json_decode(){
     //check header
     char header[5];
     input.read(header, 4);
@@ -325,14 +327,15 @@ json init_json_decode(){
     debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
     debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
 
-    return json_decode();
+    return read_RTON();
 }
 
 void bytecode_error(){
     uint8_t bytecode;
     input.seekg(input.tellg() - 1);
     input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
-    std::cout << "\nERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!\n";
+    std::cout << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
+    getch();
     exit(1);
 }

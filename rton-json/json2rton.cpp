@@ -1,3 +1,4 @@
+#include <conio.h>
 #include <fstream>
 #include <iomanip>
 #include <regex>
@@ -36,9 +37,10 @@ extern uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
 int write_RTON(json js);
 
-int json_error(){
-    std::cout << "ERROR! THIS FILE IS NOT JSON FORMAT!!!\n";
+int not_json(){
+    std::cout << "ERROR! THIS FILE IS NOT JSON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
+    getch();
     exit(1);
 }
 
@@ -124,7 +126,7 @@ int write_RTON_block(json js){
         }
         //error
         default:{
-            return json_error();
+            return not_json();
             break;
         }
     }
@@ -145,7 +147,7 @@ int rton_encode(){
         input >> js;
     }
     catch(nlohmann::detail::parse_error){
-        return json_error();
+        return not_json();
     }
     output.write("RTON", 4);
     const int RTON_ver = 1; //not sure if I ever see RTON version higher than 1

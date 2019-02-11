@@ -13,9 +13,9 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "2.0.0";
+const std::string ver = "2.1.0";
 
-extern json init_json_decode();
+extern json json_decode();
 extern int rton_encode();
 
 std::ifstream input;
@@ -44,65 +44,107 @@ std::string to_hex_string(std::vector <uint8_t> a){
 }
 
 int help(const char* argv[]){
-    std::cout << "Usage: " << argv[0] << " [option] [file_path]\n"
-    "\n[option]:\n"
-    "\t-rton2json\tcovert RTON to JSON\n"
-    "\t-json2rton\tcovert JSON to RTON\n";
+    std::cout << "Usage:" << std::endl << std::endl;
+    std::cout << argv[0] << " [file_path]\t(auto detect)" << std::endl;
+    std::cout << argv[0] << " [option]\t(manual)" << std::endl;
+    std::cout << "\n[option]:" << std::endl
+              << "\t-help\t\t\tshow help (the thing you're looking)" << std::endl
+              << "\t-rton2json [file_path]\tcovert [file_path] RTON to JSON" << std::endl
+              << "\t-json2rton [file_path]\tcovert [file_path] JSON to RTON" << std::endl;
     getch();
     return 1;
 }
 
 int main(const int argc, const char* argv[]){
-    std::cout << "\nrton-json made by H3x4n1um version " + ver << std::endl;
+    std::cout << std::endl << "rton-json made by H3x4n1um version " << ver << std::endl;
     std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
-    if (argc != 3) return help(argv);
+    if (argc > 3) return help(argv);
+
+    //get file_path
+    std::string file_path;
+    if (argc == 1){
+        std::cout << "Enter file path: ";
+        getline(std::cin, file_path);
+        puts("");
+    }
+    else if (argc == 2){
+        if (strcmp(argv[1], "-help") == 0) return help(argv);
+        file_path = argv[1];
+    }
+    else file_path = argv[2];
+
+    //check file exist
+    input.open(file_path);
+    if (!input.good()){
+        puts("ERROR! FILE NOT FOUND!!!");
+        getch();
+        return 1;
+    }
+    input.close();
 
     //info
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
     debug_js["Info"]["Executable"] = argv[0];
     debug_js["Info"]["Version"] = ver;
     debug_js["Info"]["Compile Time"] = std::string(__DATE__) + ' ' + __TIME__;
-    debug_js["Info"]["Option"] = argv[1];
-    debug_js["Info"]["File"] = argv[2];
+    //detect rton or json
+    bool is_rton = false;
+    if (argc == 3){
+        debug_js["Info"]["Mode"] = "Manual";
+        debug_js["Info"]["Option"] = argv[1];
+        if (strcmp(argv[1], "-rton2json") == 0) is_rton = true;
+        else if (strcmp(argv[1], "-json2rton") != 0) return help(argv);
+    }
+    //else just mark as json
+    else{
+        debug_js["Info"]["Mode"] = "Auto";
+        input.open(file_path, std::ifstream::binary);
+        //check header
+        char header[4];
+        input.read(header, 4);
+        if (strcmp(header, "RTON") == 0) is_rton = true;
+        input.close();
+    }
+    debug_js["Info"]["File"] = file_path;
 
-    //get file_name
+    //remove extension
     std::string file_name;
-    file_name = argv[2];
-    for (int i = file_name.size(); i > 0; --i){
-        if (file_name[i] == '.'){
-            file_name = file_name.substr(0, i);
+    for (int i = file_path.size(); i > 0; --i){
+        if (file_path[i] == '.'){
+            file_name = file_path.substr(0, i);
             break;
         }
     }
     debug.open(file_name + "_log.json");
 
     //rton2json
-    if (strcmp(argv[1], "-rton2json") == 0){
+    if (is_rton){
+        std::cout << "RTON DETECTED" << std::endl;
         //read
-        input.open(argv[2], std::ifstream::binary);
+        input.open(file_path, std::ifstream::binary);
         //write
         output.open(file_name + ".json");
-        output << std::setw(4) << init_json_decode();
+        output << std::setw(4) << json_decode();
         //close
         input.close();
         output.close();
     }
     //json2rton
-    else if (strcmp(argv[1], "-json2rton") == 0){
+    else{
+        std::cout << "JSON DETECTED" << std::endl;
         //read
-        input.open(argv[2]);
+        input.open(file_path);
         //write
         output.open(file_name + ".rton", std::ofstream::binary);
         rton_encode(); //write directly to file
         output.close();
     }
-    //else
-    else return help(argv);
-    puts("Done!");
+    puts("\nDONE!");
     //log at the end
     debug << std::setw(4) << debug_js;
     debug.close();
+    getch();
     return 0;
 }
