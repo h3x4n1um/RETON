@@ -22,13 +22,13 @@ extern json debug_js;
 extern std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 extern uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
-std::vector <std::string> stack_0x91;
+extern std::vector <std::string> stack_0x91;
 
 json read_RTON();
 void bytecode_error();
 
 int not_RTON(){
-    std::cout << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
+    std::clog << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     getch();
     return 1;
@@ -327,14 +327,20 @@ json json_decode(){
     debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
     debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
 
-    return read_RTON();
+    json js = read_RTON();
+    //check footer
+    char footer[5];
+    input.read(footer, 4);
+    footer[4] = 0;
+    if (strcmp(footer, "DONE") != 0) std::clog << R"(MISSING "DONE" AT EOF?)" << std::endl;
+    return js;
 }
 
 void bytecode_error(){
     uint8_t bytecode;
     input.seekg(input.tellg() - 1);
     input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
-    std::cout << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!" << std::endl;
+    std::clog << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     getch();
     exit(1);

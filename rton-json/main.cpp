@@ -13,7 +13,7 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "2.1.0";
+const std::string ver = "2.2.0";
 
 extern json json_decode();
 extern int rton_encode();
@@ -44,20 +44,20 @@ std::string to_hex_string(std::vector <uint8_t> a){
 }
 
 int help(const char* argv[]){
-    std::cout << "Usage:" << std::endl << std::endl;
-    std::cout << argv[0] << " [file_path]\t(auto detect)" << std::endl;
-    std::cout << argv[0] << " [option]\t(manual)" << std::endl;
-    std::cout << "\n[option]:" << std::endl
-              << "\t-help\t\t\tshow help (the thing you're looking)" << std::endl
-              << "\t-rton2json [file_path]\tcovert [file_path] RTON to JSON" << std::endl
-              << "\t-json2rton [file_path]\tcovert [file_path] JSON to RTON" << std::endl;
+    std::clog << "Usage:" << std::endl << std::endl;
+    std::clog << argv[0] << " [file_path]\t(auto detect)" << std::endl;
+    std::clog << argv[0] << " [option]\t(manual)" << std::endl;
+    std::clog << "\n[option]:" << std::endl
+              << "\t--help\t\t\tshow help (the thing you're looking)" << std::endl
+              << "\t--rton2json [file_path]\tcovert [file_path] RTON to JSON" << std::endl
+              << "\t--json2rton [file_path]\tcovert [file_path] JSON to RTON" << std::endl;
     getch();
     return 1;
 }
 
 int main(const int argc, const char* argv[]){
-    std::cout << std::endl << "rton-json made by H3x4n1um version " << ver << std::endl;
-    std::cout << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
+    std::clog << std::endl << "rton-json made by H3x4n1um version " << ver << std::endl;
+    std::clog << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc > 3) return help(argv);
@@ -65,12 +65,12 @@ int main(const int argc, const char* argv[]){
     //get file_path
     std::string file_path;
     if (argc == 1){
-        std::cout << "Enter file path: ";
+        std::clog << "Enter file path: ";
         getline(std::cin, file_path);
         puts("");
     }
     else if (argc == 2){
-        if (strcmp(argv[1], "-help") == 0) return help(argv);
+        if (strcmp(argv[1], "--help") == 0) return help(argv);
         file_path = argv[1];
     }
     else file_path = argv[2];
@@ -94,8 +94,8 @@ int main(const int argc, const char* argv[]){
     if (argc == 3){
         debug_js["Info"]["Mode"] = "Manual";
         debug_js["Info"]["Option"] = argv[1];
-        if (strcmp(argv[1], "-rton2json") == 0) is_rton = true;
-        else if (strcmp(argv[1], "-json2rton") != 0) return help(argv);
+        if (strcmp(argv[1], "--rton2json") == 0) is_rton = true;
+        else if (strcmp(argv[1], "--json2rton") != 0) return help(argv);
     }
     //else just mark as json
     else{
@@ -121,7 +121,7 @@ int main(const int argc, const char* argv[]){
 
     //rton2json
     if (is_rton){
-        std::cout << "RTON DETECTED" << std::endl;
+        std::clog << "RTON DETECTED" << std::endl;
         //read
         input.open(file_path, std::ifstream::binary);
         //write
@@ -133,7 +133,7 @@ int main(const int argc, const char* argv[]){
     }
     //json2rton
     else{
-        std::cout << "JSON DETECTED" << std::endl;
+        std::clog << "JSON DETECTED" << std::endl;
         //read
         input.open(file_path);
         //write
