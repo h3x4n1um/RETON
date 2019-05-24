@@ -12,33 +12,36 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const uint8_t signed_int        = 0x20; //int32_t
-const uint8_t unsigned_int      = 0x26; //uint32_t
-const uint8_t float64           = 0x42;
-const uint8_t str               = 0x81; //string 0x81
-const uint8_t str_rtid          = 0x82; //string 0x82 (use in RTID)
-const uint8_t null              = 0x84;
-const uint8_t sub_object        = 0x85;
-const uint8_t str_substitute    = 0x90;
-const uint8_t substitute        = 0x91;
-const uint8_t eoa               = 0xfe; //end of array
-const uint8_t eoo               = 0xff; //end of object
+const uint8_t signed_int            = 0x20; //int32_t
+const uint8_t unsigned_int          = 0x26; //uint32_t
+const uint8_t float64               = 0x42;
+const uint8_t str                   = 0x81; //string 0x81
+const uint8_t str_rtid              = 0x82; //string 0x82 (use in RTID)
+const uint8_t null                  = 0x84;
+const uint8_t sub_object            = 0x85;
+const uint8_t ascii                 = 0x90;
+const uint8_t ascii_stack           = 0x91;
+const uint8_t utf8                  = 0x92;
+const uint8_t utf8_stack            = 0x93;
+const uint8_t eoa                   = 0xfe; //end of array
+const uint8_t eoo                   = 0xff; //end of object
 
-const uint16_t rtid             = 0x0383; //rtid 83 03
-const uint16_t arr              = 0xfd86; //array 86 fd
+const uint16_t rtid                 = 0x0383; //rtid 83 03
+const uint16_t arr                  = 0xfd86; //array 86 fd
 
 //import from main.cpp
-extern std::string to_hex_string(std::vector <uint8_t> a);
-extern std::string to_hex_string(uint64_t q);
+std::string to_hex_string(std::vector <uint8_t> a);
+std::string to_hex_string(uint64_t q);
 extern std::ifstream input;
 extern std::ofstream debug;
 extern std::ofstream output;
 extern json debug_js;
 //import from RTON_number.cpp
-extern std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
-extern uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
+std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
+uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
-std::vector <std::string> stack_0x91;
+extern std::vector <std::string> stack_0x91;
+extern std::vector <std::string> stack_0x93;
 
 int write_RTON(json js);
 
@@ -91,19 +94,48 @@ int write_RTON_block(json js){
             }
             //normal string
             else{
-                auto it = std::find(stack_0x91.begin(), stack_0x91.end(), temp);
-                if (it == stack_0x91.end()){
-                    debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(str_substitute));
-                    output.write(reinterpret_cast<const char*> (&str_substitute), sizeof str_substitute);
-                    write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
-                    output << temp;
-                    debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + temp);
-                    stack_0x91.push_back(temp);
+                ///https://en.wikipedia.org/wiki/UTF-8#Examples
+                int utf8_size = 0;
+                for (uint8_t i : temp){
+                    if (i <= 0177) utf8_size += 1;
+                    if (i >= 0302 && i <= 0337) utf8_size += 1;
+                    if (i >= 0340 && i <= 0357) utf8_size += 1;
+                    if (i >= 0360 && i <= 0364) utf8_size += 1;
                 }
-                else{
-                    debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(substitute));
-                    output.write(reinterpret_cast<const char*> (&substitute), sizeof substitute);
-                    write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x91.begin()));
+                //ascii
+                if (utf8_size == temp.size()){
+                    auto it = std::find(stack_0x91.begin(), stack_0x91.end(), temp);
+                    if (it == stack_0x91.end()){
+                        debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(ascii));
+                        output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
+                        output << temp;
+                        debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + temp);
+                        stack_0x91.push_back(temp);
+                    }
+                    else{
+                        debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(ascii_stack));
+                        output.write(reinterpret_cast<const char*> (&ascii_stack), sizeof ascii_stack);
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x91.begin()));
+                    }
+                }
+                //utf8
+                if (utf8_size < temp.size()){
+                    auto it = std::find(stack_0x93.begin(), stack_0x93.end(), temp);
+                    if (it == stack_0x93.end()){
+                        debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8));
+                        output.write(reinterpret_cast<const char*> (&utf8), sizeof utf8);
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(utf8_size));
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
+                        output << temp;
+                        debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + temp);
+                        stack_0x93.push_back(temp);
+                    }
+                    else{
+                        debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8_stack));
+                        output.write(reinterpret_cast<const char*> (&utf8_stack), sizeof utf8_stack);
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x93.begin()));
+                    }
                 }
             }
             break;
