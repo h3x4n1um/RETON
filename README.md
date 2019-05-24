@@ -7,7 +7,7 @@
 
 ## RTON Cheatsheet
 Bytecode | Type | Note
-- | - | -
+--- | --- | ---
 `0x0` | false |
 `0x1` | true |
 `0xa` | uint8_t | unsigned int 8 bit
