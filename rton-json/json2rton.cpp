@@ -57,6 +57,18 @@ int write_unsigned_RTON_num(std::vector <uint8_t> a){
     return 0;
 }
 
+///https://en.wikipedia.org/wiki/UTF-8#Examples
+int get_utf8_size(std::string q){
+    int utf8_size = 0;
+    for (uint8_t i : q){
+        if (i <= 0177) utf8_size += 1;
+        if (i >= 0302 && i <= 0337) utf8_size += 1;
+        if (i >= 0340 && i <= 0357) utf8_size += 1;
+        if (i >= 0360 && i <= 0364) utf8_size += 1;
+    }
+    return utf8_size;
+}
+
 int write_RTON_block(json js){
     switch(js.type()){
         //null
@@ -85,23 +97,16 @@ int write_RTON_block(json js){
                 //get 2 strings
                 std::string first_string = temp.substr(temp.find("@") + 1),
                             second_string = temp.substr(0, temp.find("@"));
-                write_unsigned_RTON_num(int2unsigned_RTON_num(first_string.size()));
+                write_unsigned_RTON_num(int2unsigned_RTON_num(get_utf8_size(first_string)));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(first_string.size()));
                 output << first_string;
-                write_unsigned_RTON_num(int2unsigned_RTON_num(second_string.size()));
+                write_unsigned_RTON_num(int2unsigned_RTON_num(get_utf8_size(second_string)));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(second_string.size()));
                 output << second_string;
             }
             //normal string
             else{
-                ///https://en.wikipedia.org/wiki/UTF-8#Examples
-                int utf8_size = 0;
-                for (uint8_t i : temp){
-                    if (i <= 0177) utf8_size += 1;
-                    if (i >= 0302 && i <= 0337) utf8_size += 1;
-                    if (i >= 0340 && i <= 0357) utf8_size += 1;
-                    if (i >= 0360 && i <= 0364) utf8_size += 1;
-                }
+                int utf8_size = get_utf8_size(temp);
                 //ascii
                 if (utf8_size == temp.size()){
                     auto it = std::find(stack_0x91.begin(), stack_0x91.end(), temp);

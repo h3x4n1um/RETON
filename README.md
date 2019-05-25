@@ -29,8 +29,8 @@ Bytecode | Type | Note
 `0x42` | double | [Double-precision floating-point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)
 `0x44` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x45` | [RTON_t](#rton-number) | RTON number
-`0x81` | [RTON string](#0x81) |
-`0x82` | [RTON string](#0x82) |
+`0x81` | [String](#string) |
+`0x82` | [Utf-8 string](#utf-8-string) |
 `0x8303` | [RTID](#rtid) | RTON ID
 `0x85` | [Object](#object) |
 `0x86fd` | [Array](#array) |
@@ -41,8 +41,8 @@ Bytecode | Type | Note
 `0xfe` | [End of array](#array) |
 `0xff` | [End of object](#end-of-object) |
 
-### Unsigned RTON Number
-#### `0x24`, `0x28` and `0x44`
+## Unsigned RTON Number
+### `0x24`, `0x28` and `0x44`
 * It read 1 byte at a time and keep reading til it found a byte that SMALLER or EQUAL `0x7f`
 
 * After that it do something like this pseudocode:
@@ -81,8 +81,8 @@ Bytecode | Type | Note
     }
     ```
 
-### RTON Number
-#### `0x25`, `0x29` and `0x45`
+## RTON Number
+### `0x25`, `0x29` and `0x45`
 * Pseudocode:
     ```cpp
     RTON_number = unsigned_RTON_number;
@@ -90,20 +90,21 @@ Bytecode | Type | Note
     RTON_number /= 2;
     ```
 
-### String
-#### `0x81`
+## String
+### `0x81`
 * `81 xx [string]` create a `[string]` that has EXACTLY `xx` **unsigned RTON number** of bytes.
 
-#### `0x82`
-* `82 [L1] [L2] [string]` where `[L1]` = `[L2]` = **unsigned RTON number** length of `[string]`.
+## UTF-8 String
+### `0x82`
+* `82 [L1] [L2] [string]` where `[L1]` is **unsigned RTON number** characters in utf-8 and `[L2]` is **unsigned RTON number** bytes of `[string]`.
 
-### RTID
-#### `0x8303`
+## RTID
+### `0x8303`
 * `0x8303` begin the RTID (RTON ID???) of RTON (cross-reference???).
 
 * It has 2 strings after the RTID: `RTID(2nd_string@1st_string)`.
 
-* After `0x8303` is 2 strings format: `[L1] [L2] [string]` where `[L1]` = `[L2]` = **unsigned RTON number** length of `[string]`.
+* After `0x8303` is 2 strings format: `[L1] [L2] [string]` where `[L1]` is **unsigned RTON number** characters in utf-8 and `[L2]` is **unsigned RTON number** bytes of `[string]`.
 
 * Example:
     ```
@@ -122,8 +123,8 @@ Bytecode | Type | Note
     }
     ```
 
-### Object
-#### `0x85`
+## Object
+### `0x85`
 * Create a object as value
 
 * Example:
@@ -145,8 +146,8 @@ Bytecode | Type | Note
     }
     ```
 
-### Array
-#### `0x86fd`, `0xfe`
+## Array
+### `0x86fd`, `0xfe`
 * Array begin with `0x86fd xx` and end with `0xfe`, where `xx` is the number of elements in array.
 
 * Example:
@@ -172,8 +173,8 @@ Bytecode | Type | Note
     }
     ```
 
-### Cached String
-#### `0x90` and `0x91`
+## Cached String
+### `0x90` and `0x91`
 * `90 xx [string]` create a `[string]` that has EXACTLY `xx` **unsigned RTON number** of bytes.
 
 * By using `0x90`, the string will push in a stack then it can be recall by `91 xx`, `xx` is **unsigned RTON number**-th element in the stack (starting from 0). Let's call the stack is ASCII_CACHE.
@@ -198,8 +199,8 @@ Bytecode | Type | Note
     }
     ```
 
-### Cached UTF-8 String
-#### `0x92` and `0x93`
+## Cached UTF-8 String
+### `0x92` and `0x93`
 * Very much like the **Cached String**, `0x92` and `0x93` different is use the utf-8 encode
 
 * `92 xx yy [string]` create a utf-8 `[string]` that has EXACTLY `xx` **unsigned RTON number** of utf-8 characters with `yy` **unsigned RTON number** bytes.
@@ -227,8 +228,8 @@ Bytecode | Type | Note
     }
     ```
 
-### End of Object
-#### `0xff`
+## End of Object
+### `0xff`
 * Mark end of an object.
 
 * Example:

@@ -13,7 +13,7 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "2.3.0";
+const std::string ver = "2.3.1";
 
 json json_decode();
 int rton_encode();

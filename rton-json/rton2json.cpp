@@ -199,15 +199,11 @@ json read_RTON_block(){
         case 0x82:{
             //get string buffer
             uint64_t s_buffer = unsigned_RTON_num2int(read_RTON_num());
-            uint64_t s_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-            char* s;
-            if (s_buffer == s_buffer_check){
-                s = new char [s_buffer + 1];
-                input.read(s, s_buffer);
-                s[s_buffer] = 0;
-                res.push_back(std::string(s));
-            }
-            else bytecode_error();
+            s_buffer = unsigned_RTON_num2int(read_RTON_num());
+            char s[s_buffer +1];
+            input.read(s, s_buffer);
+            s[s_buffer] = 0;
+            res.push_back(std::string(s));
             break;
         }
         //RTID
@@ -218,24 +214,16 @@ json read_RTON_block(){
             if (check == 0x3){
                 //get 1st string
                 uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
-                uint64_t s1_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-                char* s1;
-                if (s1_buffer == s1_buffer_check){
-                    s1 = new char [s1_buffer + 1];
-                    input.read(s1, s1_buffer);
-                    s1[s1_buffer] = 0;
-                }
-                else bytecode_error();
+                s1_buffer = unsigned_RTON_num2int(read_RTON_num());
+                char s1[s1_buffer + 1];
+                input.read(s1, s1_buffer);
+                s1[s1_buffer] = 0;
                 //get 2nd string
                 uint64_t s2_buffer = unsigned_RTON_num2int(read_RTON_num());
-                uint64_t s2_buffer_check = unsigned_RTON_num2int(read_RTON_num());
-                char* s2;
-                if (s2_buffer == s2_buffer_check){
-                    s2 = new char [s2_buffer + 1];
-                    input.read(s2, s2_buffer);
-                    s2[s2_buffer] = 0;
-                }
-                else bytecode_error();
+                s2_buffer = unsigned_RTON_num2int(read_RTON_num());
+                char s2[s2_buffer + 1];
+                input.read(s2, s2_buffer);
+                s2[s2_buffer] = 0;
                 res.push_back(std::string() + "RTID(" + s2 + '@' + s1 + ')');
             }
             else bytecode_error();
