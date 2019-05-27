@@ -216,10 +216,6 @@ int rton_encode(){
     output.write("RTON", 4);
     const int RTON_ver = 1; //not sure if I ever see RTON version higher than 1
     output.write(reinterpret_cast <const char*> (&RTON_ver), sizeof RTON_ver);
-    //init RTON Stats
-    debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
-    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
-    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
     write_RTON(js);
     output.write("DONE", 4);
     return 0;

@@ -343,11 +343,6 @@ json json_decode(){
     if (strcmp(header, "RTON") != 0) exit(not_RTON());
     uint32_t RTON_ver;
     input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
-    //init RTON Stats
-    debug_js["RTON Stats"]["RTON Version"] = RTON_ver;
-    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
-    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
-    debug_js["RTON Stats"]["0x93 Stack"].push_back("Unsigned RTON Number: UTF-8 String");
 
     json js = read_RTON();
     //check footer

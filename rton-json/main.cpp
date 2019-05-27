@@ -44,13 +44,13 @@ std::string to_hex_string(std::vector <uint8_t> a){
 }
 
 int help(const char* argv[]){
-    std::clog << "Usage:" << std::endl << std::endl;
-    std::clog << argv[0] << " [file_path]\t(auto detect)" << std::endl;
-    std::clog << argv[0] << " [option]\t(manual)" << std::endl;
-    std::clog << "\n[option]:" << std::endl
-              << "\t--help\t\t\tshow help (the thing you're looking)" << std::endl
-              << "\t--rton2json [file_path]\tcovert [file_path] RTON to JSON" << std::endl
-              << "\t--json2rton [file_path]\tcovert [file_path] JSON to RTON" << std::endl;
+    std::clog << "Usage:" << std::endl
+              << '\t' << argv[0] << " [file_path]\t\t(auto detect)" << std::endl
+              << '\t' << argv[0] << " [option]\t\t(manual)" << std::endl;
+    std::clog << "[option]:" << std::endl
+              << "\t--help\t\t\t\tshow help (the thing you're looking at)" << std::endl
+              << "\t--rton2json [file_path]\t\tcovert [file_path] RTON to JSON" << std::endl
+              << "\t--json2rton [file_path]\t\tcovert [file_path] JSON to RTON" << std::endl;
     getch();
     return 1;
 }
@@ -77,8 +77,8 @@ int main(const int argc, const char* argv[]){
 
     //check file exist
     input.open(file_path);
-    if (!input.good()){
-        puts("ERROR! FILE NOT FOUND!!!");
+    if (input.fail()){
+        std::cerr << "ERROR READING FILE " << file_path << "!!!" << std::endl;
         getch();
         return 1;
     }
@@ -110,14 +110,14 @@ int main(const int argc, const char* argv[]){
     debug_js["Info"]["File"] = file_path;
 
     //remove extension
-    std::string file_name;
-    for (int i = file_path.size(); i > 0; --i){
-        if (file_path[i] == '.'){
-            file_name = file_path.substr(0, i);
-            break;
-        }
-    }
+    std::string file_name = file_path.substr(0, file_path.find_last_of("."));
     debug.open(file_name + "_log.json");
+
+    //init RTON Stats
+    debug_js["RTON Stats"]["RTON Version"] = 1; //not sure if it ever higher than 1
+    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
+    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
+    debug_js["RTON Stats"]["0x93 Stack"].push_back("Unsigned RTON Number: UTF-8 String");
 
     //rton2json
     if (is_rton){
@@ -139,6 +139,7 @@ int main(const int argc, const char* argv[]){
         //write
         output.open(file_name + ".rton", std::ofstream::binary);
         rton_encode(); //write directly to file
+        input.close();
         output.close();
     }
     puts("\nDONE!");

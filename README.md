@@ -243,11 +243,12 @@ Bytecode | Type | Note
     {}
     ```
 
-## P/s:
-If there is anything wrong feel free to open an issue on github
+## TODO:
+* Support regex input e.g: `rton-json *.rton`
+* Write a header file act like extension to json.hpp, [something like `json::from_cbor()` and `json::to_cbor()`](https://github.com/nlohmann/json#binary-formats-bson-cbor-messagepack-and-ubjson)
 
 ## Credit
 * [Niels Lohmann](http://nlohmann.me/) for his awesome [json parser](https://github.com/nlohmann/json) and [fifo_map](https://github.com/nlohmann/fifo_map)
 
-## TODO:
-* Write a header file act like extension to json.hpp, [something like `json::from_cbor()` and `json::to_cbor()`](https://github.com/nlohmann/json#binary-formats-bson-cbor-messagepack-and-ubjson)
+## P/s:
+If there is anything wrong feel free to open an issue on github
