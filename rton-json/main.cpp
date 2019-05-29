@@ -44,10 +44,10 @@ std::string to_hex_string(std::vector <uint8_t> a){
 }
 
 int help(const char* argv[]){
-    std::clog << "Usage:" << std::endl
+    std::cerr << "Usage:" << std::endl
               << '\t' << argv[0] << " [file_path]\t\t(auto detect)" << std::endl
-              << '\t' << argv[0] << " [option]\t\t(manual)" << std::endl;
-    std::clog << "[option]:" << std::endl
+              << '\t' << argv[0] << " [option]\t\t(manual)" << std::endl
+              << "[option]:" << std::endl
               << "\t--help\t\t\t\tshow help (the thing you're looking at)" << std::endl
               << "\t--rton2json [file_path]\t\tcovert [file_path] RTON to JSON" << std::endl
               << "\t--json2rton [file_path]\t\tcovert [file_path] JSON to RTON" << std::endl;
@@ -61,7 +61,6 @@ int main(const int argc, const char* argv[]){
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc > 3) return help(argv);
-
     //get file_path
     std::string file_path;
     if (argc == 1){
@@ -89,6 +88,7 @@ int main(const int argc, const char* argv[]){
     debug_js["Info"]["Executable"] = argv[0];
     debug_js["Info"]["Version"] = ver;
     debug_js["Info"]["Compile Time"] = std::string(__DATE__) + ' ' + __TIME__;
+
     //detect rton or json
     bool is_rton = false;
     if (argc == 3){
@@ -139,6 +139,7 @@ int main(const int argc, const char* argv[]){
         //write
         output.open(file_name + ".rton", std::ofstream::binary);
         rton_encode(); //write directly to file
+        //close
         input.close();
         output.close();
     }

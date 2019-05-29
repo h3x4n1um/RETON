@@ -29,7 +29,7 @@ json read_RTON();
 void bytecode_error();
 
 int not_RTON(){
-    std::clog << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
+    std::cerr << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     getch();
     return 1;
@@ -37,9 +37,7 @@ int not_RTON(){
 
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
-    uint8_t sub_num;
-    input.read(reinterpret_cast <char*> (&sub_num), sizeof sub_num);
-    RTON_num.push_back(sub_num);
+    uint8_t sub_num = 0x80;
     while(sub_num > 0x7f){
         input.read(reinterpret_cast <char*> (&sub_num), sizeof sub_num);
         RTON_num.push_back(sub_num);
@@ -126,7 +124,7 @@ json read_RTON_block(){
             res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
-        //signed RTON number
+        //RTON number
         case 0x25:{
             int64_t num = unsigned_RTON_num2int(read_RTON_num());
             if (num % 2) num = -(num + 1);
@@ -151,7 +149,7 @@ json read_RTON_block(){
             res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
-        //signed RTON number???
+        //RTON number???
         case 0x29:{
             int64_t num = unsigned_RTON_num2int(read_RTON_num());
             if (num % 2) num = -(num + 1);
@@ -176,7 +174,7 @@ json read_RTON_block(){
             res.push_back(unsigned_RTON_num2int(read_RTON_num()));
             break;
         }
-        //signed RTON number???
+        //RTON number???
         case 0x45:{
             int64_t num = unsigned_RTON_num2int(read_RTON_num());
             if (num % 2) num = -(num + 1);
@@ -186,23 +184,20 @@ json read_RTON_block(){
         }
         //string
         case 0x81:{
-            //get buffer
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
-
-            //read buffer
             char temp[buffer + 1];
             input.read(temp, buffer);
             temp[buffer] = 0;
             res.push_back(std::string(temp));
             break;
         }
+        //utf-8 string
         case 0x82:{
-            //get string buffer
-            uint64_t s_buffer = unsigned_RTON_num2int(read_RTON_num());
-            s_buffer = unsigned_RTON_num2int(read_RTON_num());
-            char s[s_buffer +1];
-            input.read(s, s_buffer);
-            s[s_buffer] = 0;
+            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+            buffer = unsigned_RTON_num2int(read_RTON_num());
+            char s[buffer +1];
+            input.read(s, buffer);
+            s[buffer] = 0;
             res.push_back(std::string(s));
             break;
         }
@@ -245,62 +240,56 @@ json read_RTON_block(){
             uint8_t check;
             input.read(reinterpret_cast <char*> (&check), sizeof check);
             if (check == 0xfd){
-                size_t num_elements = unsigned_RTON_num2int(read_RTON_num());
+                size_t arr_size = unsigned_RTON_num2int(read_RTON_num());
                 json arr = json::array();
-                for (int i = 0; i < num_elements; ++i) arr.push_back(read_RTON_block()[0]);
+                for (int i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
                 res.push_back(arr);
                 //check end of array
-                uint8_t check_end;
-                input.read(reinterpret_cast <char*> (&check_end), sizeof check_end);
-                if (check_end != 0xfe) bytecode_error();
+                uint8_t arr_end;
+                input.read(reinterpret_cast <char*> (&arr_end), sizeof arr_end);
+                if (arr_end != 0xfe) bytecode_error();
             }
             else bytecode_error();
             break;
         }
-        //substitute
+        //cached string
         case 0x90:{
             //get buffer
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
-
             //read buffer
             char temp[buffer + 1];
             input.read(temp, buffer);
             temp[buffer] = 0;
-
             //logging
             debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + std::string(temp));
-
             //push to stack_0x91 and write json
             stack_0x91.push_back(temp);
             res.push_back(stack_0x91[stack_0x91.size() - 1]);
             break;
         }
         case 0x91:{
-            //substitute
+            //recall
             res.push_back(stack_0x91[unsigned_RTON_num2int(read_RTON_num())]);
             break;
         }
-        //substitute
+        //cached utf-8 string
         case 0x92:{
             //get buffer
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
             buffer = unsigned_RTON_num2int(read_RTON_num());
-
             //read buffer
             char temp[buffer + 1];
             input.read(temp, buffer);
             temp[buffer] = 0;
-
             //logging
             debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + std::string(temp));
-
-            //push to stack_0x92 and write json
+            //push to stack_0x93 and write json
             stack_0x93.push_back(temp);
             res.push_back(stack_0x93[stack_0x93.size() - 1]);
             break;
         }
         case 0x93:{
-            //substitute
+            //recall
             res.push_back(stack_0x93[unsigned_RTON_num2int(read_RTON_num())]);
             break;
         }
@@ -323,7 +312,6 @@ json read_RTON(){
     while(true){
         std::string key;
         json js_key = read_RTON_block();
-        //TODO: check "DONE" at end of RTON file
         if (js_key.size() == 0) return res;
         else{
             if (!js_key[0].is_string()) bytecode_error();
@@ -345,6 +333,7 @@ json json_decode(){
     input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
 
     json js = read_RTON();
+
     //check footer
     char footer[5];
     input.read(footer, 4);
@@ -357,7 +346,7 @@ void bytecode_error(){
     uint8_t bytecode;
     input.seekg(input.tellg() - 1);
     input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
-    std::clog << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!" << std::endl;
+    std::cerr << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int)bytecode << " AT " << input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     getch();
     exit(1);

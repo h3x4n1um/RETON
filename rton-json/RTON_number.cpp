@@ -14,8 +14,7 @@ std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
         return res;
     }
     uint8_t temp = q % 0x100;
-    q /= 0x100;
-    q *= 2;
+    q = q / 0x100 * 2;
     if (temp > 0x7f) ++q;
     else temp += 0x80; //reverse & 0x7f
     res = int2unsigned_RTON_num(q);

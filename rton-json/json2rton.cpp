@@ -18,7 +18,7 @@ const uint8_t float64               = 0x42;
 const uint8_t str                   = 0x81; //string 0x81
 const uint8_t str_rtid              = 0x82; //string 0x82 (use in RTID)
 const uint8_t null                  = 0x84;
-const uint8_t sub_object            = 0x85;
+const uint8_t object                = 0x85;
 const uint8_t ascii                 = 0x90;
 const uint8_t ascii_stack           = 0x91;
 const uint8_t utf8                  = 0x92;
@@ -46,18 +46,13 @@ extern std::vector <std::string> stack_0x93;
 int write_RTON(json js);
 
 int not_json(){
-    std::clog << "ERROR! THIS FILE IS NOT JSON FORMAT!!!" << std::endl;
+    std::cerr << "ERROR! THIS FILE IS NOT JSON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     getch();
     exit(1);
 }
 
-int write_unsigned_RTON_num(std::vector <uint8_t> a){
-    for (uint8_t i : a) output.write(reinterpret_cast<const char*> (&i), sizeof i);
-    return 0;
-}
-
-///https://en.wikipedia.org/wiki/UTF-8#Examples
+//https://en.wikipedia.org/wiki/UTF-8#Examples
 int get_utf8_size(std::string q){
     int utf8_size = 0;
     for (uint8_t i : q){
@@ -67,6 +62,11 @@ int get_utf8_size(std::string q){
         if (i >= 0360 && i <= 0364) utf8_size += 1;
     }
     return utf8_size;
+}
+
+int write_unsigned_RTON_num(std::vector <uint8_t> a){
+    for (uint8_t i : a) output.write(reinterpret_cast<const char*> (&i), sizeof i);
+    return 0;
 }
 
 int write_RTON_block(json js){
@@ -97,6 +97,7 @@ int write_RTON_block(json js){
                 //get 2 strings
                 std::string first_string = temp.substr(temp.find("@") + 1),
                             second_string = temp.substr(0, temp.find("@"));
+
                 write_unsigned_RTON_num(int2unsigned_RTON_num(get_utf8_size(first_string)));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(first_string.size()));
                 output << first_string;
@@ -124,8 +125,8 @@ int write_RTON_block(json js){
                         write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x91.begin()));
                     }
                 }
-                //utf8
-                if (utf8_size < temp.size()){
+                //utf-8
+                else{
                     auto it = std::find(stack_0x93.begin(), stack_0x93.end(), temp);
                     if (it == stack_0x93.end()){
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8));
@@ -149,7 +150,7 @@ int write_RTON_block(json js){
         case json::value_t::number_integer:{
             debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(signed_int));
             output.write(reinterpret_cast<const char*> (&signed_int), sizeof signed_int);
-            int temp = js.get<int>();
+            int32_t temp = js.get<int32_t>();
             output.write(reinterpret_cast<const char*> (&temp), sizeof temp);
             break;
         }
@@ -171,8 +172,8 @@ int write_RTON_block(json js){
         }
         //object
         case json::value_t::object:{
-            debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(sub_object));
-            output.write(reinterpret_cast<const char*> (&sub_object), sizeof sub_object);
+            debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(object));
+            output.write(reinterpret_cast<const char*> (&object), sizeof object);
             write_RTON(js);
             break;
         }
