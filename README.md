@@ -10,11 +10,14 @@ Bytecode | Type | Note
 --- | --- | ---
 `0x0` | false |
 `0x1` | true |
+`0x8` | int8_t | int 8 bit
+`0x9` | 0 | 0 int int8_t?
 `0xa` | uint8_t | unsigned int 8 bit
-`0xb` | 0 | 0 in int8_t?
+`0xb` | 0 | 0 in uint8_t?
 `0x10` | int16_t | int 16 bit
 `0x11` | 0 | 0 in int16_t?
 `0x12` | uint16_t | unsigned int 16 bit
+`0x13` | 0 | 0 in uint16_t?
 `0x20` | int32_t | int 32 bit
 `0x21` | 0 | 0 in int32_t?
 `0x22` | float | [Single-precision floating-point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)
@@ -25,8 +28,9 @@ Bytecode | Type | Note
 `0x27` | 0 | 0 in uint32_t?
 `0x28` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x29`? | [RTON_t](#rton-number) | RTON number
-`0x41` | 0.0 | 0 in double?
+`0x41` | 0.0 | 0 in double? (something fishy here)
 `0x42` | double | [Double-precision floating-point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)
+`0x43` | 0.0 | 0 in double???
 `0x44` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x45` | [RTON_t](#rton-number) | RTON number
 `0x81` | [String](#string) |
@@ -125,7 +129,7 @@ Bytecode | Type | Note
 
 ## Object
 ### `0x85`
-* Create a object as value
+* Create an object as value
 
 * Example:
     ```

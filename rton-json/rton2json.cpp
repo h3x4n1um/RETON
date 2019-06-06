@@ -64,6 +64,18 @@ json read_RTON_block(){
             res.push_back(true);
             break;
         }
+        //int8_t
+        case 0x8:{
+            int8_t num;
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
+            res.push_back(num);
+            break;
+        }
+        //0???
+        case 0x9:{
+            res.push_back(0);
+            break;
+        }
         //uint8_t
         case 0xa:{
             uint8_t num;
@@ -93,6 +105,11 @@ json read_RTON_block(){
             uint16_t num;
             input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
+            break;
+        }
+        //0???
+        case 0x13:{
+            res.push_back(0);
             break;
         }
         //int32_t
@@ -158,6 +175,7 @@ json read_RTON_block(){
             break;
         }
         //0.0???
+        /*TODO: verify 0x41 type in rton*/
         case 0x41:{
             res.push_back(0.0);
             break;
@@ -167,6 +185,13 @@ json read_RTON_block(){
             double num;
             input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
+            break;
+        }
+        /*I guess it is 0.0 in double base on previous the cheatsheet (type + 0 in that type)???
+        but if 0x43 is 0.0 in double then wtf is 0x41???*/
+        //0.0???
+        case 0x43:{
+            res.push_back(0.0);
             break;
         }
         //unsigned RTON number???
