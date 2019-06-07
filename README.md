@@ -35,13 +35,14 @@ Bytecode | Type | Note
 `0x45` | [RTON_t](#rton-number) | RTON number
 `0x81` | [String](#string) |
 `0x82` | [Utf-8 string](#utf-8-string) |
-`0x8303` | [RTID](#rtid) | RTON ID
+`0x83` | [RTID](#rtid) | RTON ID
 `0x85` | [Object](#object) |
-`0x86fd` | [Array](#array) |
+`0x86` | [Array](#array) |
 `0x90` | [Cached string](#cached-string) |
 `0x91` | [Cached string recall](#cached-string) |
 `0x92` | [Cached utf-8 string](#cached-utf-8-string) |
 `0x93` | [Cached utf-8 string recall](#cached-utf-8-string) |
+`0xfd` | [Begin of array](#array) | 
 `0xfe` | [End of array](#array) |
 `0xff` | [End of object](#end-of-object) |
 
@@ -103,12 +104,18 @@ Bytecode | Type | Note
 * `82 [L1] [L2] [string]` where `[L1]` is **unsigned RTON number** characters in utf-8 and `[L2]` is **unsigned RTON number** bytes of `[string]`.
 
 ## RTID
-### `0x8303`
-* `0x8303` begin the RTID (RTON ID???) of RTON (cross-reference???).
+### `0x83`
+```
+83 03 [L1] [L2] [string] [L3] [L4] [string 2]
+```
+* Format **RTID(`[string 2]`@`[string]`)**
 
-* It has 2 strings after the RTID: `RTID(2nd_string@1st_string)`.
+* `0x83` begin the RTID (RTON ID???) of RTON (cross-reference???).
 
-* After `0x8303` is 2 strings format: `[L1] [L2] [string]` where `[L1]` is **unsigned RTON number** characters in utf-8 and `[L2]` is **unsigned RTON number** bytes of `[string]`.
+* It has 2 subsets (`0x2` and `0x3`)
+
+#### `0x3` Subset
+* After `0x8303` is 2 strings format: `[L1] [L2] [string]` same as `0x82`
 
 * Example:
     ```
@@ -124,6 +131,35 @@ Bytecode | Type | Note
     ```JSON
     {
         "RTID Example": "RTID(2ndString@1stString)"
+    }
+    ```
+
+#### `0x2` Subset (may not be correct)
+```
+83 02 [L1] [L2] [string] [U2] [U1] [4 bytes ID]
+```
+* Format: **RTID(`[U1]`.`[U2]`.`[4 bytes ID]`@`[string]`)** (this is my assumption, it may not correct)
+
+* `[L1] [L2] [string]` is same as `0x82`
+
+* `[U2]` is the second number in uid
+
+* `[U1]` is the first number in uid
+
+* `[ID]` the third (hex) number in uid
+
+* Example:
+    ```
+    52 54 4F 4E 01 00 00 00 
+        90 09 6D 5F 74 68 69 73 50 74 72 83 02 0C 0C 51 75 65 73 74 73 41 63 74 69 76 65 00 01 7D A7 7B 6D
+    FF
+    44 4F 4E 45
+    ```
+
+    * JSON decode:
+    ```json
+    {
+        "m_thisPtr": "RTID(1.0.6d7ba77d@QuestsActive)"
     }
     ```
 
@@ -151,8 +187,10 @@ Bytecode | Type | Note
     ```
 
 ## Array
-### `0x86fd`, `0xfe`
-* Array begin with `0x86fd xx` and end with `0xfe`, where `xx` is the number of elements in array.
+### `0x86`, `0xfd` and `0xfe`
+* `0x86` is declare an array
+
+* Array begin with `0xfd xx` and end with `0xfe`, where `xx` is the number of elements in array.
 
 * Example:
     ```
@@ -179,7 +217,7 @@ Bytecode | Type | Note
 
 ## Cached String
 ### `0x90` and `0x91`
-* `90 xx [string]` create a `[string]` that has EXACTLY `xx` **unsigned RTON number** of bytes.
+* `90 xx [string]`, the `xx [string]` is just like `0x81`
 
 * By using `0x90`, the string will push in a stack then it can be recall by `91 xx`, `xx` is **unsigned RTON number**-th element in the stack (starting from 0). Let's call the stack is ASCII_CACHE.
 
@@ -207,7 +245,7 @@ Bytecode | Type | Note
 ### `0x92` and `0x93`
 * Very much like the **Cached String**, `0x92` and `0x93` different is use the utf-8 encode
 
-* `92 xx yy [string]` create a utf-8 `[string]` that has EXACTLY `xx` **unsigned RTON number** of utf-8 characters with `yy` **unsigned RTON number** bytes.
+* `92 [L1] [L2] [string]`, the `[L1] [L2] [string]` same as `0x82`.
 
 * Example:
     ```
@@ -248,6 +286,8 @@ Bytecode | Type | Note
     ```
 
 ## TODO:
+* **Find the correct format of 0x8302**
+
 * Support regex input e.g: `rton-json *.rton`
 
 * Check for endianness

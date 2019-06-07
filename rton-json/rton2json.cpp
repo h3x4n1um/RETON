@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "fifo_map.hpp"
 #include "json.hpp"
@@ -187,7 +188,7 @@ json read_RTON_block(){
             res.push_back(num);
             break;
         }
-        /*I guess it is 0.0 in double base on previous the cheatsheet (type + 0 in that type)???
+        /*I guess it is 0.0 in double via previous bytecode in the cheatsheet (type + 0 in that type)???
         but if 0x43 is 0.0 in double then wtf is 0x41???*/
         //0.0???
         case 0x43:{
@@ -228,10 +229,10 @@ json read_RTON_block(){
         }
         //RTID
         case 0x83:{
-            uint8_t check;
-            input.read(reinterpret_cast <char*> (&check), sizeof check);
-            //check for 03
-            if (check == 0x3){
+            uint8_t subset;
+            input.read(reinterpret_cast <char*> (&subset), sizeof subset);
+            //subset 0x3
+            if (subset == 0x3){
                 //get 1st string
                 uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
                 s1_buffer = unsigned_RTON_num2int(read_RTON_num());
@@ -244,8 +245,28 @@ json read_RTON_block(){
                 char s2[s2_buffer + 1];
                 input.read(s2, s2_buffer);
                 s2[s2_buffer] = 0;
-                res.push_back(std::string() + "RTID(" + s2 + '@' + s1 + ')');
+                res.push_back(std::string("RTID(") + s2 + '@' + s1 + ')');
             }
+            //subset 0x2
+            else if (subset == 0x2){
+                uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+                buffer = unsigned_RTON_num2int(read_RTON_num());
+                char s[buffer + 1];
+                input.read(s, buffer);
+                s[buffer] = 0;
+
+                uint64_t second_uid = unsigned_RTON_num2int(read_RTON_num());
+                uint64_t first_uid = unsigned_RTON_num2int(read_RTON_num());
+                uint32_t third_uid;
+                input.read(reinterpret_cast <char *> (&third_uid), sizeof third_uid);
+
+                std::stringstream ss;
+                std::string uid;
+                ss << std::dec << first_uid << '.' << second_uid << '.' << std::hex << third_uid;
+                ss >> uid;
+                res.push_back(std::string("RTID(") + uid + '@' + s + ')');
+            }
+            //unknown
             else bytecode_error();
             break;
         }
@@ -261,10 +282,9 @@ json read_RTON_block(){
         }
         //array
         case 0x86:{
-            //check for fd
-            uint8_t check;
-            input.read(reinterpret_cast <char*> (&check), sizeof check);
-            if (check == 0xfd){
+            uint8_t arr_begin;
+            input.read(reinterpret_cast <char*> (&arr_begin), sizeof arr_begin);
+            if (arr_begin == 0xfd){
                 size_t arr_size = unsigned_RTON_num2int(read_RTON_num());
                 json arr = json::array();
                 for (int i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
@@ -286,7 +306,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + std::string(temp));
+            debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + temp);
             //push to stack_0x91 and write json
             stack_0x91.push_back(temp);
             res.push_back(stack_0x91[stack_0x91.size() - 1]);
@@ -307,7 +327,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + std::string(temp));
+            debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + temp);
             //push to stack_0x93 and write json
             stack_0x93.push_back(temp);
             res.push_back(stack_0x93[stack_0x93.size() - 1]);

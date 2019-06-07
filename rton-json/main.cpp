@@ -13,7 +13,7 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "2.4.0";
+const std::string ver = "2.5.0";
 
 json json_decode();
 int rton_encode();
@@ -109,9 +109,7 @@ int main(const int argc, const char* argv[]){
     }
     debug_js["Info"]["File"] = file_path;
 
-    //remove extension
-    std::string file_name = file_path.substr(0, file_path.find_last_of("."));
-    debug.open(file_name + "_log.json");
+    debug.open(file_path + "_log.json");
 
     //init RTON Stats
     debug_js["RTON Stats"]["RTON Version"] = 1; //not sure if it ever higher than 1
@@ -125,7 +123,7 @@ int main(const int argc, const char* argv[]){
         //read
         input.open(file_path, std::ifstream::binary);
         //write
-        output.open(file_name + ".json");
+        output.open(file_path + ".json");
         output << std::setw(4) << json_decode();
         //close
         input.close();
@@ -137,7 +135,7 @@ int main(const int argc, const char* argv[]){
         //read
         input.open(file_path);
         //write
-        output.open(file_name + ".rton", std::ofstream::binary);
+        output.open(file_path + ".rton", std::ofstream::binary);
         rton_encode(); //write directly to file
         //close
         input.close();
