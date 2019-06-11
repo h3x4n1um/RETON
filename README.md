@@ -105,17 +105,17 @@ Bytecode | Type | Note
 
 ## RTID
 ### `0x83`
-```
-83 03 [L1] [L2] [string] [L3] [L4] [string 2]
-```
-* Format **RTID(`[string 2]`@`[string]`)**
-
 * `0x83` begin the RTID (RTON ID???) of RTON (cross-reference???).
 
 * It has 2 subsets (`0x2` and `0x3`)
 
 #### `0x3` Subset
-* After `0x8303` is 2 strings format: `[L1] [L2] [string]` same as `0x82`
+```
+83 03 [L1] [L2] [string] [L3] [L4] [string 2]
+```
+* Format: **RTID(`[string 2]`@`[string]`)**
+
+* After `0x8303` is 2 strings format: `[L1] [L2] [string]` and `[L3] [L4] [string 2]` same as `0x82`
 
 * Example:
     ```
