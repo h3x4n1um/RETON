@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "rton-json.h"
 #include "fifo_map.hpp"
 #include "json.hpp"
 
@@ -13,7 +14,7 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const std::string ver = "2.5.0";
+const std::string ver = std::to_string(VERSION_MAJOR) + '.' + std::to_string(VERSION_MINOR) + '.' + std::to_string(VERSION_PATCH);
 
 json json_decode();
 int rton_encode();
@@ -56,8 +57,9 @@ int help(const char* argv[]){
 }
 
 int main(const int argc, const char* argv[]){
-    std::clog << std::endl << "rton-json made by H3x4n1um version " << ver << std::endl;
-    std::clog << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
+    std::clog << std::endl << "rton-json made by H3x4n1um" << std::endl
+              << "Version: " << ver << std::endl
+              << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
     puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
 
     if (argc > 3) return help(argv);

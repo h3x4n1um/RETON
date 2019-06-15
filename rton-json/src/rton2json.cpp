@@ -257,7 +257,7 @@ json read_RTON_block(){
 
                 uint64_t second_uid = unsigned_RTON_num2int(read_RTON_num());
                 uint64_t first_uid = unsigned_RTON_num2int(read_RTON_num());
-                uint32_t third_uid;
+                int32_t third_uid;
                 input.read(reinterpret_cast <char *> (&third_uid), sizeof third_uid);
 
                 std::stringstream ss;
