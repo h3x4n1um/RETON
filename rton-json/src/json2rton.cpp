@@ -39,8 +39,6 @@ uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
 std::unordered_map <std::string, uint64_t> map_0x91;
 std::unordered_map <std::string, uint64_t> map_0x93;
-uint64_t cnt_0x91;
-uint64_t cnt_0x93;
 
 int write_RTON(json js);
 
@@ -133,9 +131,8 @@ int write_RTON_block(json js){
                         output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
-                        debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(cnt_0x91)) + ": " + temp);
-                        ++cnt_0x91;
-                        map_0x91[temp] = cnt_0x91;
+                        debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(map_0x91.size() - 1)) + ": " + temp);
+                        map_0x91[temp] = map_0x91.size();
                     }
                     else{
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(ascii_stack));
@@ -151,9 +148,8 @@ int write_RTON_block(json js){
                         write_unsigned_RTON_num(int2unsigned_RTON_num(utf8_size));
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
-                        debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(cnt_0x93)) + ": " + temp);
-                        ++cnt_0x93;
-                        map_0x93[temp] = cnt_0x93;
+                        debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(map_0x93.size() - 1)) + ": " + temp);
+                        map_0x93[temp] = map_0x93.size();
                     }
                     else{
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8_stack));
