@@ -1,4 +1,3 @@
-#include <conio.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -52,7 +51,7 @@ int help(const char* argv[]){
               << "\t--help\t\t\t\tshow help (the thing you're looking at)" << std::endl
               << "\t--rton2json [file_path]\t\tcovert [file_path] RTON to JSON" << std::endl
               << "\t--json2rton [file_path]\t\tcovert [file_path] JSON to RTON" << std::endl;
-    getch();
+    std::cin.get();
     return 1;
 }
 
@@ -80,7 +79,7 @@ int main(const int argc, const char* argv[]){
     input.open(file_path);
     if (input.fail()){
         std::cerr << "ERROR READING FILE " << file_path << "!!!" << std::endl;
-        getch();
+        std::cin.get();
         return 1;
     }
     input.close();
@@ -147,6 +146,6 @@ int main(const int argc, const char* argv[]){
     //log at the end
     debug << std::setw(4) << debug_js;
     debug.close();
-    getch();
+    std::cin.get();
     return 0;
 }

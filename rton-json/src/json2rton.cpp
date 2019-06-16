@@ -1,4 +1,3 @@
-#include <conio.h>
 #include <fstream>
 #include <iomanip>
 #include <regex>
@@ -46,7 +45,7 @@ int write_RTON(json js);
 int not_json(){
     std::cerr << "ERROR! THIS FILE IS NOT JSON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
-    getch();
+    std::cin.get();
     exit(1);
 }
 

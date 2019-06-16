@@ -1,4 +1,3 @@
-#include <conio.h>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -32,7 +31,7 @@ void bytecode_error(uint8_t bytecode);
 int not_RTON(){
     std::cerr << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
     debug << std::setw(4) << debug_js;
-    getch();
+    std::cin.get();
     return 1;
 }
 
@@ -362,7 +361,7 @@ json read_RTON(){
             if (!js_key[0].is_string()){
                 std::cerr << std::endl << "ERROR! KEY IS NOT A STRING!!!" << std::endl;
                 debug << std::setw(4) << debug_js;
-                getch();
+                std::cin.get();
                 exit(1);
             }
             key = js_key[0];
@@ -395,6 +394,6 @@ json json_decode(){
 void bytecode_error(uint8_t bytecode){
     std::cerr << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int) bytecode << " AT " << (uint64_t) input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
-    getch();
+    std::cin.get();
     exit(1);
 }
