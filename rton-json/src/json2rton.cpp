@@ -37,8 +37,10 @@ extern json debug_js;
 std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
-extern std::vector <std::string> stack_0x91;
-extern std::vector <std::string> stack_0x93;
+std::unordered_map <std::string, uint64_t> map_0x91;
+std::unordered_map <std::string, uint64_t> map_0x93;
+uint64_t cnt_0x91;
+uint64_t cnt_0x93;
 
 int write_RTON(json js);
 
@@ -126,37 +128,37 @@ int write_RTON_block(json js){
                 int utf8_size = get_utf8_size(temp);
                 //ascii
                 if (utf8_size == temp.size()){
-                    auto it = std::find(stack_0x91.begin(), stack_0x91.end(), temp);
-                    if (it == stack_0x91.end()){
+                    if (map_0x91[temp] == 0){
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(ascii));
                         output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
-                        debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + temp);
-                        stack_0x91.push_back(temp);
+                        debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(cnt_0x91)) + ": " + temp);
+                        ++cnt_0x91;
+                        map_0x91[temp] = cnt_0x91;
                     }
                     else{
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(ascii_stack));
                         output.write(reinterpret_cast<const char*> (&ascii_stack), sizeof ascii_stack);
-                        write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x91.begin()));
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(map_0x91[temp] - 1));
                     }
                 }
                 //utf-8
                 else{
-                    auto it = std::find(stack_0x93.begin(), stack_0x93.end(), temp);
-                    if (it == stack_0x93.end()){
+                    if (map_0x93[temp] == 0){
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8));
                         output.write(reinterpret_cast<const char*> (&utf8), sizeof utf8);
                         write_unsigned_RTON_num(int2unsigned_RTON_num(utf8_size));
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
-                        debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + temp);
-                        stack_0x93.push_back(temp);
+                        debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(cnt_0x93)) + ": " + temp);
+                        ++cnt_0x93;
+                        map_0x93[temp] = cnt_0x93;
                     }
                     else{
                         debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp()) + ": " + to_hex_string(utf8_stack));
                         output.write(reinterpret_cast<const char*> (&utf8_stack), sizeof utf8_stack);
-                        write_unsigned_RTON_num(int2unsigned_RTON_num(it - stack_0x93.begin()));
+                        write_unsigned_RTON_num(int2unsigned_RTON_num(map_0x93[temp] - 1));
                     }
                 }
             }
