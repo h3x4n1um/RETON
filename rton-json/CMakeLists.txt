@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(rton-json)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static -O3")
 
 set(SOURCES src/main.cpp src/RTON_number.cpp src/json2rton.cpp src/rton2json.cpp include/json.hpp include/fifo_map.hpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

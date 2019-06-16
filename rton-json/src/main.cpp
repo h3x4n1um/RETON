@@ -59,8 +59,8 @@ int help(const char* argv[]){
 int main(const int argc, const char* argv[]){
     std::clog << std::endl << "rton-json made by H3x4n1um" << std::endl
               << "Version: " << ver << std::endl
-              << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl;
-    puts("Credits: nlohmann for his awesome JSON parser and fifo_map\n");
+              << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
+              << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl;
 
     if (argc > 3) return help(argv);
     //get file_path

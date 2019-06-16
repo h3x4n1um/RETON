@@ -100,7 +100,7 @@ int write_RTON_block(json js){
                 if (std::regex_match(second_string, std::regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
                 else subset = 0x3;
 
-                debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string(output.tellp() - 1) + ": " + to_hex_string(rtid*0x100 + subset));
+                debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string((uint64_t) output.tellp() - 1) + ": " + to_hex_string(rtid*0x100 + subset));
                 output.write(reinterpret_cast<const char*> (&subset), sizeof subset);
                 write_unsigned_RTON_num(int2unsigned_RTON_num(get_utf8_size(first_string)));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(first_string.size()));
