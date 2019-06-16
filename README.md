@@ -190,7 +190,7 @@ Bytecode | Type | Note
 ### `0x86`, `0xfd` and `0xfe`
 * `0x86` is declare an array
 
-* Array begin with `0xfd xx` and end with `0xfe`, where `xx` is the number of elements in array.
+* Array begin with `0xfd xx` and end with `0xfe`, where `xx` is **unsigned RTON number** of elements in array.
 
 * Example:
     ```
