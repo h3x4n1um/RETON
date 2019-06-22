@@ -51,7 +51,7 @@ json read_RTON_block(){
     //read bytecode
     input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
     //logging
-    debug_js["RTON Stats"]["List of Bytecodes"].push_back(to_hex_string((uint64_t) input.tellg() - 1) + ": " + to_hex_string(bytecode));
+    debug_js["RTON Stats"]["List of Bytecodes"][to_hex_string((uint64_t) input.tellg() - 1)] = to_hex_string(bytecode);
     //split case
     switch (bytecode){
         //false
@@ -220,7 +220,7 @@ json read_RTON_block(){
         case 0x82:{
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
             buffer = unsigned_RTON_num2int(read_RTON_num());
-            char s[buffer +1];
+            char s[buffer + 1];
             input.read(s, buffer);
             s[buffer] = 0;
             res.push_back(std::string(s));
@@ -305,7 +305,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x91 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x91.size())) + ": " + temp);
+            debug_js["RTON Stats"]["0x91 Stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
             //push to stack_0x91 and write json
             stack_0x91.push_back(temp);
             res.push_back(stack_0x91[stack_0x91.size() - 1]);
@@ -326,7 +326,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x93 Stack"].push_back(to_hex_string(int2unsigned_RTON_num(stack_0x93.size())) + ": " + temp);
+            debug_js["RTON Stats"]["0x93 Stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
             //push to stack_0x93 and write json
             stack_0x93.push_back(temp);
             res.push_back(stack_0x93[stack_0x93.size() - 1]);

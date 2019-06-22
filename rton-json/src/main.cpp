@@ -45,12 +45,12 @@ std::string to_hex_string(std::vector <uint8_t> a){
 
 int help(const char* argv[]){
     std::cerr << "Usage:" << std::endl
-              << '\t' << argv[0] << " [file_path]\t\t(auto detect)" << std::endl
-              << '\t' << argv[0] << " [option]\t\t(manual)" << std::endl
-              << "[option]:" << std::endl
-              << "\t--help\t\t\t\tshow help (the thing you're looking at)" << std::endl
-              << "\t--rton2json [file_path]\t\tcovert [file_path] RTON to JSON" << std::endl
-              << "\t--json2rton [file_path]\t\tcovert [file_path] JSON to RTON" << std::endl;
+              << '\t' << argv[0] << " <file-path>" << std::endl
+              << '\t' << argv[0] << " [options]" << " <file-path>" << std::endl << std::endl
+              << "Options:" << std::endl
+              << "\t--help\t\tShow help (the thing you're looking at)" << std::endl
+              << "\t--rton2json\tForce covert RTON to JSON" << std::endl
+              << "\t--json2rton\tForce covert JSON to RTON" << std::endl;
     std::cin.get();
     return 1;
 }
@@ -114,9 +114,9 @@ int main(const int argc, const char* argv[]){
 
     //init RTON Stats
     debug_js["RTON Stats"]["RTON Version"] = 1; //not sure if it ever higher than 1
-    debug_js["RTON Stats"]["List of Bytecodes"].push_back("Offset: Bytecode");
-    debug_js["RTON Stats"]["0x91 Stack"].push_back("Unsigned RTON Number: String");
-    debug_js["RTON Stats"]["0x93 Stack"].push_back("Unsigned RTON Number: UTF-8 String");
+    debug_js["RTON Stats"]["List of Bytecodes"]["Offset"] = "Bytecode";
+    debug_js["RTON Stats"]["0x91 Stack"]["Unsigned RTON Number"] = "String";
+    debug_js["RTON Stats"]["0x93 Stack"]["Unsigned RTON Number"] = "UTF-8 String";
 
     //rton2json
     if (is_rton){
