@@ -11,9 +11,9 @@ template<class K, class V, class dummy_compare, class A>
 using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
-const uint8_t signed_int            = 0x45; //RTON_T
-const uint8_t unsigned_int          = 0x44; //uRTON_t
 const uint8_t float64               = 0x42;
+const uint8_t unsigned_int          = 0x44; //uRTON_t
+const uint8_t signed_int            = 0x45; //RTON_t
 const uint8_t null                  = 0x84;
 const uint8_t rtid                  = 0x83;
 const uint8_t object                = 0x85;
