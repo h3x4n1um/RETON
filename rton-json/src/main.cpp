@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -63,11 +64,13 @@ int main(const int argc, const char* argv[]){
 
     if (argc > 3) return help(argv);
     //get file_path
-    std::string file_path;
+    std::filesystem::path file_path;
     if (argc == 1){
+        std::string temp;
         std::clog << "Enter file path: ";
-        getline(std::cin, file_path);
-        puts("");
+        getline(std::cin, temp);
+        file_path = temp;
+        std::clog << std::endl;
     }
     else if (argc == 2){
         if (strcmp(argv[1], "--help") == 0) return help(argv);
@@ -76,13 +79,11 @@ int main(const int argc, const char* argv[]){
     else file_path = argv[2];
 
     //check file exist
-    input.open(file_path);
-    if (input.fail()){
-        std::cerr << "ERROR READING FILE " << file_path << "!!!" << std::endl;
+    if (!std::filesystem::is_regular_file(file_path)){
+        std::cerr << "ERROR! CAN'T FIND FILE " << file_path << "!!!" << std::endl;
         std::cin.get();
         return 1;
     }
-    input.close();
 
     //info
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
@@ -103,14 +104,15 @@ int main(const int argc, const char* argv[]){
         debug_js["Info"]["Mode"] = "Auto";
         input.open(file_path, std::ifstream::binary);
         //check header
-        char header[4];
+        char header[5];
         input.read(header, 4);
+        header[4] = 0;
         if (strcmp(header, "RTON") == 0) is_rton = true;
         input.close();
     }
-    debug_js["Info"]["File"] = file_path;
+    debug_js["Info"]["File"] = file_path.string();
 
-    debug.open(file_path + "_log.json");
+    debug.open(file_path.string() + "_log.json");
 
     //init RTON Stats
     debug_js["RTON Stats"]["RTON Version"] = 1; //not sure if it ever higher than 1
@@ -124,7 +126,7 @@ int main(const int argc, const char* argv[]){
         //read
         input.open(file_path, std::ifstream::binary);
         //write
-        output.open(file_path + ".json");
+        output.open(file_path.string() + ".json");
         output << std::setw(4) << json_decode();
         //close
         input.close();
@@ -136,13 +138,13 @@ int main(const int argc, const char* argv[]){
         //read
         input.open(file_path);
         //write
-        output.open(file_path + ".rton", std::ofstream::binary);
+        output.open(file_path.string() + ".rton", std::ofstream::binary);
         rton_encode(); //write directly to file
         //close
         input.close();
         output.close();
     }
-    puts("\nDONE!");
+    std::clog << std::endl << "DONE";
     //log at the end
     debug << std::setw(4) << debug_js;
     debug.close();
