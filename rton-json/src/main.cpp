@@ -46,8 +46,8 @@ std::string to_hex_string(std::vector <uint8_t> a){
 
 int help(const char* argv[]){
     std::cerr << "Usage:" << std::endl
-              << '\t' << argv[0] << " <file-path>" << std::endl
-              << '\t' << argv[0] << " [options]" << " <file-path>" << std::endl << std::endl
+              << '\t' << argv[0] << " <file-or-folder-path>" << std::endl
+              << '\t' << argv[0] << " [options]" << " <file-or-folder-path>" << std::endl << std::endl
               << "Options:" << std::endl
               << "\t--help\t\tShow help (the thing you're looking at)" << std::endl
               << "\t--rton2json\tForce covert RTON to JSON" << std::endl
@@ -56,35 +56,9 @@ int help(const char* argv[]){
     return 1;
 }
 
-int main(const int argc, const char* argv[]){
-    std::clog << std::endl << "rton-json made by H3x4n1um" << std::endl
-              << "Version: " << ver << std::endl
-              << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
-              << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl << std::endl;
-
-    if (argc > 3) return help(argv);
-    //get file_path
-    std::filesystem::path file_path;
-    if (argc == 1){
-        std::string temp;
-        std::clog << "Enter file path: ";
-        getline(std::cin, temp);
-        file_path = temp;
-        std::clog << std::endl;
-    }
-    else if (argc == 2){
-        if (strcmp(argv[1], "--help") == 0) return help(argv);
-        file_path = argv[1];
-    }
-    else file_path = argv[2];
-
-    //check file exist
-    if (!std::filesystem::is_regular_file(file_path)){
-        std::cerr << "ERROR! CAN'T FIND FILE " << file_path << "!!!" << std::endl;
-        std::cin.get();
-        return 1;
-    }
-
+int process_file(std::filesystem::path file_name, const int argc, const char* argv[]){
+    debug_js.clear();
+    std::clog << "Processing file " << file_name;
     //info
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
     debug_js["Info"]["Executable"] = argv[0];
@@ -102,7 +76,7 @@ int main(const int argc, const char* argv[]){
     //else just mark as json
     else{
         debug_js["Info"]["Mode"] = "Auto";
-        input.open(file_path, std::ifstream::binary);
+        input.open(file_name, std::ifstream::binary);
         //check header
         char header[5];
         input.read(header, 4);
@@ -110,9 +84,10 @@ int main(const int argc, const char* argv[]){
         if (strcmp(header, "RTON") == 0) is_rton = true;
         input.close();
     }
-    debug_js["Info"]["File"] = file_path.string();
+    debug_js["Info"]["File"] = file_name.string();
 
-    debug.open(file_path.string() + "_log.json");
+    std::filesystem::create_directory(file_name.parent_path() / "log");
+    debug.open((file_name.parent_path() / "log" / file_name.filename()).string() + "_log.json");
 
     //init RTON Stats
     debug_js["RTON Stats"]["RTON Version"] = 1; //not sure if it ever higher than 1
@@ -120,34 +95,91 @@ int main(const int argc, const char* argv[]){
     debug_js["RTON Stats"]["0x91 Stack"]["Unsigned RTON Number"] = "String";
     debug_js["RTON Stats"]["0x93 Stack"]["Unsigned RTON Number"] = "UTF-8 String";
 
-    //rton2json
-    if (is_rton){
-        std::clog << "RTON DETECTED" << std::endl;
-        //read
-        input.open(file_path, std::ifstream::binary);
-        //write
-        output.open(file_path.string() + ".json");
-        output << std::setw(4) << json_decode();
-        //close
+    try{
+        //rton2json
+        if (is_rton){
+            std::clog << " - RTON Detected" << std::endl;
+            //read
+            input.open(file_name, std::ifstream::binary);
+            //write
+            std::filesystem::create_directory(file_name.parent_path() / "rton2json");
+            output.open((file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json");
+            output << std::setw(4) << json_decode();
+            //close
+            input.close();
+            output.close();
+        }
+        //json2rton
+        else{
+            std::clog << " - JSON Detected" << std::endl;
+            //read
+            input.open(file_name);
+            //write
+            std::filesystem::create_directory(file_name.parent_path() / "json2rton");
+            output.open((file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton", std::ofstream::binary);
+
+            rton_encode(); //write directly to file
+
+            //close
+            input.close();
+            output.close();
+        }
+        //log at the end
+        debug << std::setw(4) << debug_js;
+        debug.close();
+        std::clog << "Done" << std::endl << std::endl;
+    }
+    catch (int e){
         input.close();
         output.close();
+        debug.close();
+        std::filesystem::path out_file;
+        if (is_rton) out_file = (file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json";
+        else out_file = (file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton";
+        std::filesystem::remove(out_file);
+        std::clog << "Error code: " << e << std::endl << std::endl;
+        return e;
     }
-    //json2rton
+    return 0;
+}
+
+int main(const int argc, const char* argv[]){
+    std::clog << std::endl << "rton-json made by H3x4n1um" << std::endl
+              << "Version: " << ver << std::endl
+              << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
+              << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl << std::endl;
+
+    if (argc > 3) return help(argv);
+    //get path
+    std::filesystem::path path;
+    if (argc == 1){
+        std::string temp;
+        std::clog << "Enter file or folder path: ";
+        getline(std::cin, temp);
+        path = temp;
+        std::clog << std::endl;
+    }
+    else if (argc == 2){
+        if (strcmp(argv[1], "--help") == 0) return help(argv);
+        path = argv[1];
+    }
+    else path = argv[2];
+
+    //check file exist
+    if (!std::filesystem::is_regular_file(path) && !std::filesystem::is_directory(path)){
+        std::cerr << "Error! Can't find file or folder " << path << "!!!" << std::endl;
+        std::cin.get();
+        return 1;
+    }
+
+    if (std::filesystem::is_regular_file(path)) process_file(path, argc, argv);
     else{
-        std::clog << "JSON DETECTED" << std::endl;
-        //read
-        input.open(file_path);
-        //write
-        output.open(file_path.string() + ".rton", std::ofstream::binary);
-        rton_encode(); //write directly to file
-        //close
-        input.close();
-        output.close();
+        for (auto &file : std::filesystem::directory_iterator(path)){
+            if (std::filesystem::is_regular_file(file)){
+                process_file(file.path(), argc, argv);
+            }
+        }
     }
-    std::clog << std::endl << "DONE";
-    //log at the end
-    debug << std::setw(4) << debug_js;
-    debug.close();
-    std::cin.get();
+    std::clog << "Finished" << std::endl << std::endl;
     return 0;
 }

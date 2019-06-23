@@ -43,10 +43,9 @@ std::unordered_map <std::string, uint64_t> map_0x93;
 int write_RTON(json js);
 
 int not_json(){
-    std::cerr << "ERROR! THIS FILE IS NOT JSON FORMAT!!!" << std::endl;
+    std::cerr << "Error! This file is not JSON format!!!" << std::endl;
     debug << std::setw(4) << debug_js;
-    std::cin.get();
-    exit(1);
+    return 4;
 }
 
 //https://en.wikipedia.org/wiki/UTF-8#Examples
@@ -205,7 +204,7 @@ int write_RTON_block(json js){
         }
         //error
         default:{
-            return not_json();
+            throw not_json();
             break;
         }
     }
@@ -223,12 +222,14 @@ int write_RTON(json js){
 }
 
 int rton_encode(){
+    map_0x91.clear();
+    map_0x93.clear();
     json js;
     try{
         input >> js;
     }
     catch(nlohmann::detail::parse_error){
-        return not_json();
+        throw not_json();
     }
     output.write("RTON", 4);
     const int RTON_ver = 1; //not sure if I ever see RTON version higher than 1

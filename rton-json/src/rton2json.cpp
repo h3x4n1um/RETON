@@ -26,14 +26,7 @@ std::vector <std::string> stack_0x91;
 std::vector <std::string> stack_0x93;
 
 json read_RTON();
-void bytecode_error(uint8_t bytecode);
-
-int not_RTON(){
-    std::cerr << "ERROR! THIS FILE IS NOT RTON FORMAT!!!" << std::endl;
-    debug << std::setw(4) << debug_js;
-    std::cin.get();
-    return 1;
-}
+int bytecode_error(uint8_t bytecode);
 
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
@@ -266,7 +259,7 @@ json read_RTON_block(){
                 res.push_back(std::string("RTID(") + uid + '@' + s + ')');
             }
             //unknown
-            else bytecode_error(subset);
+            else throw bytecode_error(subset);
             break;
         }
         //null
@@ -291,9 +284,9 @@ json read_RTON_block(){
                 //check end of array
                 uint8_t arr_end;
                 input.read(reinterpret_cast <char*> (&arr_end), sizeof arr_end);
-                if (arr_end != 0xfe) bytecode_error(arr_end);
+                if (arr_end != 0xfe) throw bytecode_error(arr_end);
             }
-            else bytecode_error(arr_begin);
+            else throw bytecode_error(arr_begin);
             break;
         }
         //cached string
@@ -343,7 +336,7 @@ json read_RTON_block(){
         }
         //else just exit error
         default:{
-            bytecode_error(bytecode);
+            throw bytecode_error(bytecode);
             break;
         }
     }
@@ -355,14 +348,14 @@ json read_RTON(){
     json res;
     while(true){
         std::string key;
-        json js_key = read_RTON_block();
+        json js_key;
+        js_key = read_RTON_block();
         if (js_key.size() == 0) return res;
         else{
             if (!js_key[0].is_string()){
-                std::cerr << std::endl << "ERROR! KEY IS NOT A STRING!!!" << std::endl;
+                std::cerr << "Error! Key is not a string!!!" << std::endl;
                 debug << std::setw(4) << debug_js;
-                std::cin.get();
-                exit(1);
+                throw 3;
             }
             key = js_key[0];
         }
@@ -373,27 +366,26 @@ json read_RTON(){
 }
 
 json json_decode(){
-    //check header
-    char header[5];
-    input.read(header, 4);
-    header[4] = 0;
-    if (strcmp(header, "RTON") != 0) exit(not_RTON());
+    stack_0x91.clear();
+    stack_0x93.clear();
+    input.seekg((uint64_t) input.tellg() + 4); //skip RTON
+
     uint32_t RTON_ver;
     input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
 
-    json js = read_RTON();
+    json js;
+    js = read_RTON();
 
     //check footer
     char footer[5];
     input.read(footer, 4);
     footer[4] = 0;
-    if (strcmp(footer, "DONE") != 0) std::clog << R"(MISSING "DONE" AT EOF?)" << std::endl;
+    if (strcmp(footer, "DONE") != 0) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
     return js;
 }
 
-void bytecode_error(uint8_t bytecode){
-    std::cerr << std::endl << "ERROR READING BYTECODE " << std::hex << std::showbase << (int) bytecode << " AT " << (uint64_t) input.tellg() - 1 << "!!!" << std::endl;
+int bytecode_error(uint8_t bytecode){
+    std::cerr << "Error reading bytecode " << std::hex << std::showbase << (int) bytecode << " at " << (uint64_t) input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
-    std::cin.get();
-    exit(1);
+    return 2;
 }
