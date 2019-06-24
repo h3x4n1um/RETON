@@ -298,7 +298,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x91 Stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
+            debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
             //push to stack_0x91 and write json
             stack_0x91.push_back(temp);
             res.push_back(stack_0x91[stack_0x91.size() - 1]);
@@ -319,7 +319,7 @@ json read_RTON_block(){
             input.read(temp, buffer);
             temp[buffer] = 0;
             //logging
-            debug_js["RTON Stats"]["0x93 Stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
+            debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
             //push to stack_0x93 and write json
             stack_0x93.push_back(temp);
             res.push_back(stack_0x93[stack_0x93.size() - 1]);
