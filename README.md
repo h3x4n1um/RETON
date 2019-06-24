@@ -28,9 +28,8 @@ Bytecode | Type | Note
 `0x27` | 0 | 0 in uint32_t?
 `0x28` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x29`? | [RTON_t](#rton-number) | RTON number
-`0x41` | 0.0 | 0 in double? (something fishy here)
+`0x41` | 0.0 | 0 in double
 `0x42` | double | [Double-precision floating-point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)
-`0x43` | 0.0 | 0 in double???
 `0x44` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x45` | [RTON_t](#rton-number) | RTON number
 `0x81` | [String](#string) |

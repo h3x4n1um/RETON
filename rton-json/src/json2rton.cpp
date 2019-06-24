@@ -12,8 +12,8 @@ using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const uint8_t float64               = 0x42;
-const uint8_t unsigned_int          = 0x44; //uRTON_t
-const uint8_t signed_int            = 0x45; //RTON_t
+const uint8_t uRTON_t               = 0x44;
+const uint8_t RTON_t                = 0x45;
 const uint8_t null                  = 0x84;
 const uint8_t rtid                  = 0x83;
 const uint8_t object                = 0x85;
@@ -33,6 +33,7 @@ extern std::ifstream input;
 extern std::ofstream debug;
 extern std::ofstream output;
 extern json debug_js;
+
 //import from RTON_number.cpp
 std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
@@ -67,20 +68,17 @@ int write_unsigned_RTON_num(std::vector <uint8_t> a){
 
 int write_RTON_block(json js){
     switch(js.type()){
-        //null
         case json::value_t::null:{
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(null);
             output.write(reinterpret_cast<const char*> (&null), sizeof null);
             break;
         }
-        //boolean
         case json::value_t::boolean:{
             bool temp = js.get<bool>();
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(temp);
             output.write(reinterpret_cast<const char*> (&temp), sizeof temp);
             break;
         }
-        //string
         case json::value_t::string:{
             std::string temp = js.get<std::string>();
             //rtid
@@ -90,16 +88,16 @@ int write_RTON_block(json js){
                 //delete "RTID(" and ")"
                 temp.erase(temp.end() - 1);
                 temp.erase(0, 5);
-                //get 2 strings
+
                 std::string first_string = temp.substr(temp.find("@") + 1),
                             second_string = temp.substr(0, temp.find("@"));
 
                 uint8_t subset;
                 if (std::regex_match(second_string, std::regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
                 else subset = 0x3;
-
                 debug_js["RTON stats"]["List of bytecodes"][to_hex_string((uint64_t) output.tellp() - 1)] = to_hex_string(rtid*0x100 + subset);
                 output.write(reinterpret_cast<const char*> (&subset), sizeof subset);
+
                 write_unsigned_RTON_num(int2unsigned_RTON_num(get_utf8_size(first_string)));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(first_string.size()));
                 output << first_string;
@@ -130,6 +128,7 @@ int write_RTON_block(json js){
                         output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
+
                         debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(map_0x91.size() - 1))] = temp;
                         map_0x91[temp] = map_0x91.size();
                     }
@@ -147,6 +146,7 @@ int write_RTON_block(json js){
                         write_unsigned_RTON_num(int2unsigned_RTON_num(utf8_size));
                         write_unsigned_RTON_num(int2unsigned_RTON_num(temp.size()));
                         output << temp;
+
                         debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(map_0x93.size() - 1))] = temp;
                         map_0x93[temp] = map_0x93.size();
                     }
@@ -159,23 +159,20 @@ int write_RTON_block(json js){
             }
             break;
         }
-        //int
         case json::value_t::number_integer:{
-            debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(signed_int);
-            output.write(reinterpret_cast<const char*> (&signed_int), sizeof signed_int);
+            debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(RTON_t);
+            output.write(reinterpret_cast<const char*> (&RTON_t), sizeof RTON_t);
             int64_t temp = js.get<int64_t>();
             write_unsigned_RTON_num(int2unsigned_RTON_num(temp < 0 ? -2 * temp - 1 : 2 * temp));
             break;
         }
-        //uint
         case json::value_t::number_unsigned:{
-            debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(unsigned_int);
-            output.write(reinterpret_cast<const char*> (&unsigned_int), sizeof unsigned_int);
+            debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(uRTON_t);
+            output.write(reinterpret_cast<const char*> (&uRTON_t), sizeof uRTON_t);
             uint64_t temp = js.get<uint64_t>();
             write_unsigned_RTON_num(int2unsigned_RTON_num(temp));
             break;
         }
-        //float
         case json::value_t::number_float:{
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(float64);
             output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
@@ -183,26 +180,26 @@ int write_RTON_block(json js){
             output.write(reinterpret_cast<const char*> (&temp), sizeof temp);
             break;
         }
-        //object
         case json::value_t::object:{
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(object);
             output.write(reinterpret_cast<const char*> (&object), sizeof object);
             write_RTON(js);
             break;
         }
-        //array
         case json::value_t::array:{
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(arr);
             output.write(reinterpret_cast<const char*> (&arr), sizeof arr);
+
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(arr_begin);
             output.write(reinterpret_cast<const char*> (&arr_begin), sizeof arr_begin);
+
             write_unsigned_RTON_num(int2unsigned_RTON_num(js.size()));
             for (auto i : js) write_RTON_block(i);
+
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(arr_end);
             output.write(reinterpret_cast<const char*> (&arr_end), sizeof arr_end);
             break;
         }
-        //error
         default:{
             throw not_json();
             break;
@@ -238,5 +235,6 @@ int rton_encode(){
     output.write(reinterpret_cast <const char*> (&RTON_ver), sizeof RTON_ver);
     write_RTON(js);
     output.write("DONE", 4);
+
     return 0;
 }
