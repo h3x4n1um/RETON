@@ -1,6 +1,4 @@
 #include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <sstream>
 
 #include "fifo_map.hpp"
@@ -23,12 +21,16 @@ extern json debug_js;
 std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
+//import from error.cpp
+int bytecode_error(uint8_t bytecode);
+int key_error();
+int out_of_range_error(uint8_t bytecode);
+int eof_error(char footer[5]);
+
 std::vector <std::string> stack_0x91;
 std::vector <std::string> stack_0x93;
 
 json read_RTON();
-int bytecode_error(uint8_t bytecode);
-int out_of_range_error(uint8_t bytecode);
 
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
@@ -364,11 +366,7 @@ json read_RTON(){
         js_key = read_RTON_block();
         if (js_key.size() == 0) return res;
         else{
-            if (!js_key[0].is_string()){
-                std::cerr << "Error! Key is not a string!!!" << std::endl;
-                debug << std::setw(4) << debug_js;
-                throw 3;
-            }
+            if (!js_key[0].is_string()) throw key_error();
             key = js_key[0];
         }
 
@@ -390,7 +388,7 @@ json json_decode(){
     json js;
     js = read_RTON();
 
-    if (input.eof()) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
+    if (input.peek() == EOF) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
     else{
         char footer[5];
         input.read(footer, 4);
@@ -398,21 +396,9 @@ json json_decode(){
 
         if (strcmp(footer, "DONE") != 0){
             input.seekg((uint8_t) input.tellg() - 3);
-            throw bytecode_error(footer[0]);
+            throw eof_error(footer);
         }
     }
 
     return js;
-}
-
-int bytecode_error(uint8_t bytecode){
-    std::cerr << "Error reading bytecode " << std::hex << std::showbase << (int) bytecode << " at " << (uint64_t) input.tellg() - 1 << "!!!" << std::endl;
-    debug << std::setw(4) << debug_js;
-    return 2;
-}
-
-int out_of_range_error(uint8_t bytecode){
-    std::cerr << "Error! " << std::hex << std::showbase << (int) bytecode << " stack overflow at " << (uint64_t) input.tellg() - 1 << std::endl;
-    debug << std::setw(4) << debug_js;
-    return 5;
 }

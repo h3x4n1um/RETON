@@ -85,7 +85,16 @@ int process_file(std::filesystem::path file_name, const int argc, const char *ar
         header[4] = 0;
 
         if (strcmp(header, "RTON") == 0) file_type = 1;
-        else if (header[0] == '{' || header[0] == '[') file_type = 0;
+        else{
+            try{
+                input.seekg(0);
+                json js;
+                js = json::parse(input);
+                file_type = 0;
+            }
+            catch(json::exception &e){
+            }
+        }
 
         input.close();
     }

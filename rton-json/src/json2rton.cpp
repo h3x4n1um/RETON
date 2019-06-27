@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iomanip>
 #include <regex>
 
 #include "fifo_map.hpp"
@@ -38,12 +37,13 @@ extern json debug_js;
 std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
 
+//import from error.cpp
+int not_supported_json();
+
 std::unordered_map <std::string, uint64_t> map_0x91;
 std::unordered_map <std::string, uint64_t> map_0x93;
 
 int write_RTON(json js);
-int not_json();
-int not_supported_json();
 
 //https://en.wikipedia.org/wiki/UTF-8#Examples
 int get_utf8_size(std::string q){
@@ -196,8 +196,8 @@ int write_RTON_block(json js){
             output.write(reinterpret_cast<const char*> (&arr_end), sizeof arr_end);
             break;
         }
-        default:{
-            throw not_json();
+        case json::value_t::discarded:{
+            throw not_supported_json();
             break;
         }
     }
@@ -223,13 +223,7 @@ int rton_encode(){
     map_0x91.clear();
     map_0x93.clear();
 
-    json js;
-    try{
-        js = json::parse(input);
-    }
-    catch(json::exception &e){
-        throw not_json();
-    }
+    json js = json::parse(input);
 
     output.write("RTON", 4);
     const int RTON_ver = 1; //not sure if I ever see RTON version higher than 1
@@ -238,16 +232,4 @@ int rton_encode(){
     output.write("DONE", 4);
 
     return 0;
-}
-
-int not_json(){
-    std::cerr << "Error! This file is not JSON format!!!" << std::endl;
-    debug << std::setw(4) << debug_js;
-    return 4;
-}
-
-int not_supported_json(){
-    std::cerr << "Error! This file is a JSON but format is not supported" << std::endl;
-    debug << std::setw(4) << debug_js;
-    return 6;
 }
