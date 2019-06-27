@@ -28,6 +28,7 @@ std::vector <std::string> stack_0x93;
 
 json read_RTON();
 int bytecode_error(uint8_t bytecode);
+int out_of_range_error(uint8_t bytecode);
 
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
@@ -309,8 +310,12 @@ json read_RTON_block(){
         }
         //recall
         case 0x91:{
-            //TODO: check stack overflow
-            res.push_back(stack_0x91[unsigned_RTON_num2int(read_RTON_num())]);
+            try{
+                res.push_back(stack_0x91.at(unsigned_RTON_num2int(read_RTON_num())));
+            }
+            catch(const std::out_of_range &oor){
+                throw out_of_range_error(bytecode);
+            }
             break;
         }
         //cached utf-8 string
@@ -330,13 +335,16 @@ json read_RTON_block(){
         }
         //recall
         case 0x93:{
-            //TODO: check stack overflow
-            res.push_back(stack_0x93[unsigned_RTON_num2int(read_RTON_num())]);
+            try{
+                res.push_back(stack_0x93.at(unsigned_RTON_num2int(read_RTON_num())));
+            }
+            catch(const std::out_of_range &oor){
+                throw out_of_range_error(bytecode);
+            }
             break;
         }
         //end of object
         case 0xFF:{
-            //TODO: check for bracket
             break;
         }
         //else just exit error
@@ -378,12 +386,21 @@ json json_decode(){
     uint32_t RTON_ver;
     input.read(reinterpret_cast <char*> (&RTON_ver), sizeof RTON_ver);
     debug_js["RTON stats"]["RTON version"] = RTON_ver;
+
     json js;
     js = read_RTON();
-    char footer[5];
-    input.read(footer, 4);
-    footer[4] = 0;
-    if (strcmp(footer, "DONE") != 0) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
+
+    if (input.eof()) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
+    else{
+        char footer[5];
+        input.read(footer, 4);
+        footer[4] = 0;
+
+        if (strcmp(footer, "DONE") != 0){
+            input.seekg((uint8_t) input.tellg() - 3);
+            throw bytecode_error(footer[0]);
+        }
+    }
 
     return js;
 }
@@ -392,4 +409,10 @@ int bytecode_error(uint8_t bytecode){
     std::cerr << "Error reading bytecode " << std::hex << std::showbase << (int) bytecode << " at " << (uint64_t) input.tellg() - 1 << "!!!" << std::endl;
     debug << std::setw(4) << debug_js;
     return 2;
+}
+
+int out_of_range_error(uint8_t bytecode){
+    std::cerr << "Error! " << std::hex << std::showbase << (int) bytecode << " stack overflow at " << (uint64_t) input.tellg() - 1 << std::endl;
+    debug << std::setw(4) << debug_js;
+    return 5;
 }

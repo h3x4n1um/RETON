@@ -42,12 +42,8 @@ std::unordered_map <std::string, uint64_t> map_0x91;
 std::unordered_map <std::string, uint64_t> map_0x93;
 
 int write_RTON(json js);
-
-int not_json(){
-    std::cerr << "Error! This file is not JSON format!!!" << std::endl;
-    debug << std::setw(4) << debug_js;
-    return 4;
-}
+int not_json();
+int not_supported_json();
 
 //https://en.wikipedia.org/wiki/UTF-8#Examples
 int get_utf8_size(std::string q){
@@ -209,12 +205,17 @@ int write_RTON_block(json js){
 }
 
 int write_RTON(json js){
-    for (auto i : js.get<std::map <std::string, json> >()){
-        write_RTON_block(i.first);
-        write_RTON_block(i.second);
+    try{
+        for (auto i : js.get<std::map <std::string, json> >()){
+            write_RTON_block(i.first);
+            write_RTON_block(i.second);
+        }
+        debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(object_end);
+        output.write(reinterpret_cast<const char*> (&object_end), 1);
     }
-    debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(object_end);
-    output.write(reinterpret_cast<const char*> (&object_end), 1);
+    catch(json::exception &e){
+        throw not_supported_json();
+    }
     return 0;
 }
 
@@ -237,4 +238,16 @@ int rton_encode(){
     output.write("DONE", 4);
 
     return 0;
+}
+
+int not_json(){
+    std::cerr << "Error! This file is not JSON format!!!" << std::endl;
+    debug << std::setw(4) << debug_js;
+    return 4;
+}
+
+int not_supported_json(){
+    std::cerr << "Error! This file is a JSON but format is not supported" << std::endl;
+    debug << std::setw(4) << debug_js;
+    return 6;
 }

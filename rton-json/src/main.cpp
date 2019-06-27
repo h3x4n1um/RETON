@@ -143,7 +143,7 @@ int process_file(std::filesystem::path file_name, const int argc, const char *ar
         output.close();
         debug.close();
 
-        //remove unfinish file
+        //remove unfinished file
         std::filesystem::path out_file;
         if (file_type) out_file = (file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json";
         else out_file = (file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton";
