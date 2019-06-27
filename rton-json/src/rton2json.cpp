@@ -45,7 +45,7 @@ json read_RTON_block(){
     json res;
 
     input.read(reinterpret_cast <char*> (&bytecode), sizeof bytecode);
-    debug_js["RTON Stats"]["List of Bytecodes"][to_hex_string((uint64_t) input.tellg() - 1)] = to_hex_string(bytecode);
+    debug_js["RTON stats"]["List of bytecodes"][to_hex_string((uint64_t) input.tellg() - 1)] = to_hex_string(bytecode);
 
     switch (bytecode){
         //false
