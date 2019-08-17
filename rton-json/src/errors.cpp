@@ -1,8 +1,9 @@
 #include <fstream>
 #include <iomanip>
 
-#include "fifo_map.hpp"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
+
+#include "lib/fifo_map.hpp"
 
 //a workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
 //https://github.com/nlohmann/json/issues/485

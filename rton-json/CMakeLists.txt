@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
-project(rton-json)
+
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
+project(rton-json CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
-message("-- C++ Compiler: ${CMAKE_CXX_COMPILER_ID}")
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static -lstdc++fs")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lc++fs")
-endif()
+file(GLOB SOURCES src/*.cpp lib/*.hpp)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-file(GLOB SOURCES src/*cpp include/*.hpp)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# require nlohmann_json
+find_package(nlohmann_json 3.7.0 REQUIRED)
 
 # semver
 set(VERSION_MAJOR 2)
@@ -21,12 +21,14 @@ set(VERSION_PATCH 2)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
-configure_file (
+configure_file(
   "${PROJECT_SOURCE_DIR}/rton-json.h.in"
   "${PROJECT_BINARY_DIR}/rton-json.h"
-  )
+)
 
-include_directories(include)
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories("${PROJECT_BINARY_DIR}")
 
 add_executable(rton-json ${SOURCES})
+
+target_link_libraries(rton-json PRIVATE nlohmann_json::nlohmann_json)
