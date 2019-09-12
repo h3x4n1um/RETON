@@ -199,6 +199,32 @@ json read_RTON_block(){
             res.push_back(num);
             break;
         }
+        //uint64_t
+        case 0x46:{
+            uint64_t num;
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
+            res.push_back(num);
+            break;
+        }
+        //0???
+        case 0x47:{
+            res.push_back(0);
+            break;
+        }
+        //unsigned RTON number???
+        case 0x48:{
+            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
+            break;
+        }
+        //RTON number???
+        case 0x49:{
+            int64_t num = unsigned_RTON_num2int(read_RTON_num());
+            if (num % 2) num = -(num + 1);
+            num /= 2;
+
+            res.push_back(num);
+            break;
+        }
         //string
         case 0x81:{
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
@@ -286,7 +312,7 @@ json read_RTON_block(){
                 size_t arr_size = unsigned_RTON_num2int(read_RTON_num());
 
                 json arr = json::array();
-                for (int i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
+                for (size_t i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
 
                 res.push_back(arr);
 

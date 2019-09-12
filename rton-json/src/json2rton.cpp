@@ -12,8 +12,8 @@ using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const uint8_t float64               = 0x42;
-const uint8_t uRTON_t               = 0x44;
-const uint8_t RTON_t                = 0x45;
+const uint8_t uRTON_t               = 0x48;
+const uint8_t RTON_t                = 0x49;
 const uint8_t null                  = 0x84;
 const uint8_t rtid                  = 0x83;
 const uint8_t object                = 0x85;
@@ -117,7 +117,7 @@ int write_RTON_block(json js){
             }
             //normal string
             else{
-                int utf8_size = get_utf8_size(temp);
+                size_t utf8_size = get_utf8_size(temp);
                 //ascii
                 if (utf8_size == temp.size()){
                     if (map_0x91[temp] == 0){

@@ -6,14 +6,20 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 project(rton-json CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall")
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+endif()
 
 file(GLOB SOURCES src/*.cpp lib/*.hpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-# conan.io
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+# conan.io for non-window
+if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+endif()
 
 # require nlohmann_json
 find_package(nlohmann_json 3.7.0 REQUIRED)
@@ -21,7 +27,7 @@ find_package(nlohmann_json 3.7.0 REQUIRED)
 # semver
 set(VERSION_MAJOR 2)
 set(VERSION_MINOR 7)
-set(VERSION_PATCH 2)
+set(VERSION_PATCH 3)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
