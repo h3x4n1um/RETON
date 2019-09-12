@@ -27,11 +27,15 @@ Bytecode | Type | Note
 `0x26` | uint32_t | unsigned int 32 bit
 `0x27` | 0 | 0 in uint32_t?
 `0x28` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
-`0x29`? | [RTON_t](#rton-number) | RTON number
+`0x29` | [RTON_t](#rton-number) | RTON number
 `0x41` | 0.0 | 0 in double
 `0x42` | double | [Double-precision floating-point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)
 `0x44` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
 `0x45` | [RTON_t](#rton-number) | RTON number
+`0x46` | uint64_t | unsigned int 64 bit
+`0x47` | 0 | 0 in uint64_t?
+`0x48` | [uRTON_t](#unsigned-rton-number) | unsigned RTON number
+`0x49` | [RTON_t](#rton-number) | RTON number
 `0x81` | [String](#string) |
 `0x82` | [Utf-8 string](#utf-8-string) |
 `0x83` | [RTID](#rtid) | RTON ID
@@ -46,7 +50,7 @@ Bytecode | Type | Note
 `0xff` | [End of object](#end-of-object) |
 
 ## Unsigned RTON Number
-### `0x24`, `0x28` and `0x44`
+### `0x24`, `0x28`, `0x44` and `0x48`
 * It read 1 byte at a time and keep reading til it found a byte that SMALLER or EQUAL `0x7f`
 
 * After that it do something like this pseudocode:
@@ -86,7 +90,7 @@ Bytecode | Type | Note
     ```
 
 ## RTON Number
-### `0x25`, `0x29` and `0x45`
+### `0x25`, `0x29`, `0x45` and `0x49`
 * Pseudocode:
     ```cpp
     RTON_number = unsigned_RTON_number;
