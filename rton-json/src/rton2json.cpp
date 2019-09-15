@@ -173,9 +173,16 @@ json read_RTON_block(){
             res.push_back(num);
             break;
         }
-        //0.0???
+        //int64_t
+        case 0x40:{
+            int64_t num;
+            input.read(reinterpret_cast <char*> (&num), sizeof num);
+            res.push_back(num);
+            break;
+        }
+        //0???
         case 0x41:{
-            res.push_back(0.0);
+            res.push_back(0);
             break;
         }
         //float64
@@ -183,6 +190,11 @@ json read_RTON_block(){
             double num;
             input.read(reinterpret_cast <char*> (&num), sizeof num);
             res.push_back(num);
+            break;
+        }
+        //0.0???
+        case 0x43:{
+            res.push_back(0.0);
             break;
         }
         //unsigned RTON number???
