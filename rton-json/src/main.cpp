@@ -17,8 +17,11 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const std::string ver = std::to_string(VERSION_MAJOR) + '.' + std::to_string(VERSION_MINOR) + '.' + std::to_string(VERSION_PATCH);
 
-json json_decode();
+//import from json2rton.cpp
 int rton_encode();
+
+//import from rton2json.cpp
+json json_decode();
 
 std::ifstream input;
 std::ofstream output, debug;

@@ -26,6 +26,9 @@ const uint8_t arr_begin             = 0xfd;
 const uint8_t arr_end               = 0xfe;
 const uint8_t object_end            = 0xff;
 
+//import from error.cpp
+int not_supported_json();
+
 //import from main.cpp
 std::string to_hex_string(std::vector <uint8_t> a);
 std::string to_hex_string(uint64_t q);
@@ -37,9 +40,6 @@ extern json debug_js;
 //import from RTON_number.cpp
 std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
 uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
-
-//import from error.cpp
-int not_supported_json();
 
 std::unordered_map <std::string, uint64_t> map_0x91;
 std::unordered_map <std::string, uint64_t> map_0x93;
