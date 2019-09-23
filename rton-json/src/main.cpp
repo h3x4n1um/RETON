@@ -28,24 +28,18 @@ std::ofstream output, debug;
 json debug_js, rton_list, json_list;
 
 std::string to_hex_string(uint64_t q){
-    if (q == 0) return "0x0";
-    std::string s;
     std::stringstream ss;
-    ss << std::hex << std::showbase << q;
-    ss >> s;
-    return s;
+    ss << "0x" << std::hex << q;
+    return ss.str();
 }
 
 std::string to_hex_string(std::vector <uint8_t> a){
-    std::string s;
     std::stringstream ss;
     ss << "0x";
     for (uint8_t i : a){
-        if (i < 0x10) ss << 0;
-        ss << std::hex << (int) i;
+        ss << std::setfill('0') << std::setw(2) << std::hex << (int) i;
     }
-    ss >> s;
-    return s;
+    return ss.str();
 }
 
 int help(const char *argv[]){
@@ -71,13 +65,13 @@ int process_file(std::filesystem::path file_name, const int argc, const char *ar
     debug_js["Info"]["Compile time"] = std::string(__DATE__) + ' ' + __TIME__;
 
     //detect rton or json
-    int file_type = -1;//-1 unknown    0 json      1 rton
+    int file_type = -1;//0 json      1 rton
     if (argc == 3){
         debug_js["Info"]["Mode"] = "Manual";
-        debug_js["Info"]["Option"] = argv[1];
         if (strcmp(argv[1], "--rton2json") == 0) file_type = 1;
         else if (strcmp(argv[1], "--json2rton") == 0) file_type = 0;
         else return help(argv);
+        debug_js["Info"]["Option"] = argv[1];
     }
     else{
         debug_js["Info"]["Mode"] = "Auto";
@@ -92,8 +86,7 @@ int process_file(std::filesystem::path file_name, const int argc, const char *ar
         else{
             try{
                 input.seekg(0);
-                json js;
-                js = json::parse(input);
+                json js = json::parse(input);
                 file_type = 0;
             }
             catch(json::exception &e){
@@ -111,43 +104,55 @@ int process_file(std::filesystem::path file_name, const int argc, const char *ar
     debug_js["RTON stats"]["0x93 stack"]["Unsigned RTON number"] = "UTF-8 string";
 
     try{
-        if (file_type == -1){
-            std::clog << " - Unknown" << std::endl
-                      << "Skipped" << std::endl << std::endl;
-        }
-        else{
+        switch(file_type){
+        case 0:{
             std::filesystem::create_directory(file_name.parent_path() / "log");
             debug.open((file_name.parent_path() / "log" / file_name.filename()).string() + "_log.json");
-            //rton2json
-            if (file_type){
-                std::clog << " - RTON Detected" << std::endl;
-                rton_list["RTON files"].push_back(file_name.string());
 
-                input.open(file_name, std::ifstream::binary);
-                std::filesystem::create_directory(file_name.parent_path() / "rton2json");
-                output.open((file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json");
-                output << std::setw(4) << json_decode();
+            std::clog << " - JSON Detected" << std::endl;
+            json_list["JSON files"].push_back(file_name.string());
 
-                input.close();
-                output.close();
-            }
-            //json2rton
-            else{
-                std::clog << " - JSON Detected" << std::endl;
-                json_list["JSON files"].push_back(file_name.string());
+            input.open(file_name);
+            std::filesystem::create_directory(file_name.parent_path() / "json2rton");
+            output.open((file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton", std::ofstream::binary);
+            rton_encode(); //write directly to file
 
-                input.open(file_name);
-                std::filesystem::create_directory(file_name.parent_path() / "json2rton");
-                output.open((file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton", std::ofstream::binary);
-                rton_encode(); //write directly to file
+            input.close();
+            output.close();
 
-                input.close();
-                output.close();
-            }
             //log at the end
             debug << std::setw(4) << debug_js;
             debug.close();
             std::clog << "Done" << std::endl << std::endl;
+
+            break;
+        }
+        case 1:{
+            std::filesystem::create_directory(file_name.parent_path() / "log");
+            debug.open((file_name.parent_path() / "log" / file_name.filename()).string() + "_log.json");
+
+            std::clog << " - RTON Detected" << std::endl;
+            rton_list["RTON files"].push_back(file_name.string());
+
+            input.open(file_name, std::ifstream::binary);
+            std::filesystem::create_directory(file_name.parent_path() / "rton2json");
+            output.open((file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json");
+            output << std::setw(4) << json_decode();
+
+            input.close();
+            output.close();
+
+            //log at the end
+            debug << std::setw(4) << debug_js;
+            debug.close();
+            std::clog << "Done" << std::endl << std::endl;
+
+            break;
+        }
+        default:{
+            std::clog << " - Unknown" << std::endl
+                      << "Skipped" << std::endl << std::endl;
+        }
         }
     }
     catch (int e){
@@ -174,21 +179,29 @@ int main(const int argc, const char *argv[]){
               << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
               << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl << std::endl;
 
-    if (argc > 3) return help(argv);
-
     std::filesystem::path path;
-    if (argc == 1){
+    switch (argc){
+    case 1:{
         std::string temp;
         std::clog << "Enter file or folder path: ";
         getline(std::cin, temp);
         path = temp;
         std::clog << std::endl;
+        break;
     }
-    else if (argc == 2){
+    case 2:{
         if (strcmp(argv[1], "--help") == 0) return help(argv);
         path = argv[1];
+        break;
     }
-    else path = argv[2];
+    case 3:{
+        path = argv[2];
+        break;
+    }
+    default:{
+        return help(argv);
+    }
+    }
 
     if (!std::filesystem::is_regular_file(path) && !std::filesystem::is_directory(path)){
         std::cerr << "Error! Can't find file or folder " << path << "!!!" << std::endl;

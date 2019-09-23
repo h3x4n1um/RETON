@@ -42,11 +42,11 @@ T read(){
 
 std::vector <uint8_t> read_RTON_num(){
     std::vector <uint8_t> RTON_num;
-    uint8_t sub_num = 0x80;
-    while(sub_num > 0x7f){
+    uint8_t sub_num;
+    do{
         sub_num = read<uint8_t>();
         RTON_num.push_back(sub_num);
-    }
+    }while(sub_num > 0x7f);
     return RTON_num;
 }
 
@@ -57,185 +57,201 @@ json read_RTON_block(){
     debug_js["RTON stats"]["List of bytecodes"][to_hex_string((uint64_t) input.tellg() - 1)] = to_hex_string(bytecode);
 
     switch (bytecode){
-        //false
-        case 0x0:{
-            res.push_back(false);
-            break;
-        }
-        //true
-        case 0x1:{
-            res.push_back(true);
-            break;
-        }
-        //int8_t
-        case 0x8:{
-            res.push_back(read<int8_t>());
-            break;
-        }
-        //0???
-        case 0x9:{
-            res.push_back(0);
-            break;
-        }
-        //uint8_t
-        case 0xa:{
-            res.push_back(read<uint8_t>());
-            break;
-        }
-        //0???
-        case 0xb:{
-            res.push_back(0);
-            break;
-        }
-        //int16_t
-        case 0x10:{
-            res.push_back(read<int16_t>());
-            break;
-        }
-        //0???
-        case 0x11:{
-            res.push_back(0);
-            break;
-        }
-        //uint16_t
-        case 0x12:{
-            res.push_back(read<uint16_t>());
-            break;
-        }
-        //0???
-        case 0x13:{
-            res.push_back(0);
-            break;
-        }
-        //int32_t
-        case 0x20:{
-            res.push_back(read<int32_t>());
-            break;
-        }
-        //0???
-        case 0x21:{
-            res.push_back(0);
-            break;
-        }
-        //float32
-        case 0x22:{
-            res.push_back(read<float>());
-            break;
-        }
-        //0.0???
-        case 0x23:{
-            res.push_back(0.0);
-            break;
-        }
-        //unsigned RTON number
-        case 0x24:{
-            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
-            break;
-        }
-        //RTON number
-        case 0x25:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2) num = -(num + 1);
-            num /= 2;
+    //false
+    case 0x0:{
+        res.push_back(false);
+        break;
+    }
+    //true
+    case 0x1:{
+        res.push_back(true);
+        break;
+    }
+    //int8_t
+    case 0x8:{
+        res.push_back(read<int8_t>());
+        break;
+    }
+    //0???
+    case 0x9:{
+        res.push_back(0);
+        break;
+    }
+    //uint8_t
+    case 0xa:{
+        res.push_back(read<uint8_t>());
+        break;
+    }
+    //0???
+    case 0xb:{
+        res.push_back(0);
+        break;
+    }
+    //int16_t
+    case 0x10:{
+        res.push_back(read<int16_t>());
+        break;
+    }
+    //0???
+    case 0x11:{
+        res.push_back(0);
+        break;
+    }
+    //uint16_t
+    case 0x12:{
+        res.push_back(read<uint16_t>());
+        break;
+    }
+    //0???
+    case 0x13:{
+        res.push_back(0);
+        break;
+    }
+    //int32_t
+    case 0x20:{
+        res.push_back(read<int32_t>());
+        break;
+    }
+    //0???
+    case 0x21:{
+        res.push_back(0);
+        break;
+    }
+    //float32
+    case 0x22:{
+        res.push_back(read<float>());
+        break;
+    }
+    //0.0???
+    case 0x23:{
+        res.push_back(0.0);
+        break;
+    }
+    //unsigned RTON number
+    case 0x24:{
+        res.push_back(unsigned_RTON_num2int(read_RTON_num()));
+        break;
+    }
+    //RTON number
+    case 0x25:{
+        int64_t num = unsigned_RTON_num2int(read_RTON_num());
+        if (num % 2) num = -(num + 1);
+        num /= 2;
 
-            res.push_back(num);
-            break;
-        }
-        //uint32_t
-        case 0x26:{
-            res.push_back(read<uint32_t>());
-            break;
-        }
-        //0???
-        case 0x27:{
-            res.push_back(0);
-            break;
-        }
-        //unsigned RTON number???
-        case 0x28:{
-            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
-            break;
-        }
-        //RTON number???
-        case 0x29:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2) num = -(num + 1);
-            num /= 2;
+        res.push_back(num);
+        break;
+    }
+    //uint32_t
+    case 0x26:{
+        res.push_back(read<uint32_t>());
+        break;
+    }
+    //0???
+    case 0x27:{
+        res.push_back(0);
+        break;
+    }
+    //unsigned RTON number???
+    case 0x28:{
+        res.push_back(unsigned_RTON_num2int(read_RTON_num()));
+        break;
+    }
+    //RTON number???
+    case 0x29:{
+        int64_t num = unsigned_RTON_num2int(read_RTON_num());
+        if (num % 2) num = -(num + 1);
+        num /= 2;
 
-            res.push_back(num);
-            break;
-        }
-        //int64_t
-        case 0x40:{
-            res.push_back(read<int64_t>());
-            break;
-        }
-        //0???
-        case 0x41:{
-            res.push_back(0);
-            break;
-        }
-        //float64
-        case 0x42:{
-            res.push_back(read<double>());
-            break;
-        }
-        //0.0???
-        case 0x43:{
-            res.push_back(0.0);
-            break;
-        }
-        //unsigned RTON number???
-        case 0x44:{
-            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
-            break;
-        }
-        //RTON number???
-        case 0x45:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2) num = -(num + 1);
-            num /= 2;
+        res.push_back(num);
+        break;
+    }
+    //int64_t
+    case 0x40:{
+        res.push_back(read<int64_t>());
+        break;
+    }
+    //0???
+    case 0x41:{
+        res.push_back(0);
+        break;
+    }
+    //float64
+    case 0x42:{
+        res.push_back(read<double>());
+        break;
+    }
+    //0.0???
+    case 0x43:{
+        res.push_back(0.0);
+        break;
+    }
+    //unsigned RTON number???
+    case 0x44:{
+        res.push_back(unsigned_RTON_num2int(read_RTON_num()));
+        break;
+    }
+    //RTON number???
+    case 0x45:{
+        int64_t num = unsigned_RTON_num2int(read_RTON_num());
+        if (num % 2) num = -(num + 1);
+        num /= 2;
 
-            res.push_back(num);
-            break;
-        }
-        //uint64_t
-        case 0x46:{
-            res.push_back(read<uint64_t>());
-            break;
-        }
-        //0???
-        case 0x47:{
-            res.push_back(0);
-            break;
-        }
-        //unsigned RTON number???
-        case 0x48:{
-            res.push_back(unsigned_RTON_num2int(read_RTON_num()));
-            break;
-        }
-        //RTON number???
-        case 0x49:{
-            int64_t num = unsigned_RTON_num2int(read_RTON_num());
-            if (num % 2) num = -(num + 1);
-            num /= 2;
+        res.push_back(num);
+        break;
+    }
+    //uint64_t
+    case 0x46:{
+        res.push_back(read<uint64_t>());
+        break;
+    }
+    //0???
+    case 0x47:{
+        res.push_back(0);
+        break;
+    }
+    //unsigned RTON number???
+    case 0x48:{
+        res.push_back(unsigned_RTON_num2int(read_RTON_num()));
+        break;
+    }
+    //RTON number???
+    case 0x49:{
+        int64_t num = unsigned_RTON_num2int(read_RTON_num());
+        if (num % 2) num = -(num + 1);
+        num /= 2;
 
-            res.push_back(num);
-            break;
-        }
-        //string
-        case 0x81:{
-            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+        res.push_back(num);
+        break;
+    }
+    //string
+    case 0x81:{
+        uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
 
-            char temp[buffer + 1];
-            input.read(temp, buffer);
-            temp[buffer] = 0;
+        char temp[buffer + 1];
+        input.read(temp, buffer);
+        temp[buffer] = 0;
 
-            res.push_back(std::string(temp));
-            break;
-        }
-        //utf-8 string
-        case 0x82:{
+        res.push_back(std::string(temp));
+        break;
+    }
+    //utf-8 string
+    case 0x82:{
+        uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+        buffer = unsigned_RTON_num2int(read_RTON_num());
+
+        char s[buffer + 1];
+        input.read(s, buffer);
+        s[buffer] = 0;
+
+        res.push_back(std::string(s));
+        break;
+    }
+    //RTID
+    case 0x83:{
+        uint8_t subset = read<uint8_t>();
+
+        switch (subset){
+        case 0x2:{
             uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
             buffer = unsigned_RTON_num2int(read_RTON_num());
 
@@ -243,158 +259,140 @@ json read_RTON_block(){
             input.read(s, buffer);
             s[buffer] = 0;
 
-            res.push_back(std::string(s));
+            uint64_t second_uid = unsigned_RTON_num2int(read_RTON_num());
+            uint64_t first_uid = unsigned_RTON_num2int(read_RTON_num());
+            uint32_t third_uid = read<uint32_t>();
+
+            std::stringstream ss;
+            ss << std::dec << first_uid << '.' << second_uid << '.' << std::hex << third_uid;
+
+            res.push_back(std::string("RTID(") + ss.str() + '@' + s + ')');
             break;
         }
-        //RTID
-        case 0x83:{
-            uint8_t subset = read<uint8_t>();
+        case 0x3:{
+            uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
+            s1_buffer = unsigned_RTON_num2int(read_RTON_num());
 
-            if (subset == 0x3){
-                uint64_t s1_buffer = unsigned_RTON_num2int(read_RTON_num());
-                s1_buffer = unsigned_RTON_num2int(read_RTON_num());
+            char s1[s1_buffer + 1];
+            input.read(s1, s1_buffer);
+            s1[s1_buffer] = 0;
 
-                char s1[s1_buffer + 1];
-                input.read(s1, s1_buffer);
-                s1[s1_buffer] = 0;
+            uint64_t s2_buffer = unsigned_RTON_num2int(read_RTON_num());
+            s2_buffer = unsigned_RTON_num2int(read_RTON_num());
 
-                uint64_t s2_buffer = unsigned_RTON_num2int(read_RTON_num());
-                s2_buffer = unsigned_RTON_num2int(read_RTON_num());
+            char s2[s2_buffer + 1];
+            input.read(s2, s2_buffer);
+            s2[s2_buffer] = 0;
 
-                char s2[s2_buffer + 1];
-                input.read(s2, s2_buffer);
-                s2[s2_buffer] = 0;
-
-                res.push_back(std::string("RTID(") + s2 + '@' + s1 + ')');
-            }
-            else if (subset == 0x2){
-                uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
-                buffer = unsigned_RTON_num2int(read_RTON_num());
-
-                char s[buffer + 1];
-                input.read(s, buffer);
-                s[buffer] = 0;
-
-                uint64_t second_uid = unsigned_RTON_num2int(read_RTON_num());
-                uint64_t first_uid = unsigned_RTON_num2int(read_RTON_num());
-                uint32_t third_uid = read<uint32_t>();
-
-                std::stringstream ss;
-                std::string uid;
-                ss << std::dec << first_uid << '.' << second_uid << '.' << std::hex << third_uid;
-                ss >> uid;
-
-                res.push_back(std::string("RTID(") + uid + '@' + s + ')');
-            }
-            else throw bytecode_error(subset);
+            res.push_back(std::string("RTID(") + s2 + '@' + s1 + ')');
             break;
         }
-        //null
-        case 0x84:{
-            res.push_back(nullptr);
-            break;
-        }
-        //sub-object
-        case 0x85:{
-            res.push_back(read_RTON());
-            break;
-        }
-        //array
-        case 0x86:{
-            uint8_t arr_begin = read<uint8_t>();
-
-            if (arr_begin == 0xfd){
-                size_t arr_size = unsigned_RTON_num2int(read_RTON_num());
-
-                json arr = json::array();
-                for (size_t i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
-
-                res.push_back(arr);
-
-                uint8_t arr_end = read<uint8_t>();
-                if (arr_end != 0xfe) throw bytecode_error(arr_end);
-            }
-            else throw bytecode_error(arr_begin);
-            break;
-        }
-        //cached string
-        case 0x90:{
-            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
-
-            char temp[buffer + 1];
-            input.read(temp, buffer);
-            temp[buffer] = 0;
-
-            debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
-            stack_0x91.push_back(temp);
-
-            res.push_back(stack_0x91[stack_0x91.size() - 1]);
-            break;
-        }
-        //recall
-        case 0x91:{
-            try{
-                res.push_back(stack_0x91.at(unsigned_RTON_num2int(read_RTON_num())));
-            }
-            catch(const std::out_of_range &oor){
-                throw out_of_range_error(bytecode);
-            }
-            break;
-        }
-        //cached utf-8 string
-        case 0x92:{
-            uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
-            buffer = unsigned_RTON_num2int(read_RTON_num());
-
-            char temp[buffer + 1];
-            input.read(temp, buffer);
-            temp[buffer] = 0;
-
-            debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
-            stack_0x93.push_back(temp);
-
-            res.push_back(stack_0x93[stack_0x93.size() - 1]);
-            break;
-        }
-        //recall
-        case 0x93:{
-            try{
-                res.push_back(stack_0x93.at(unsigned_RTON_num2int(read_RTON_num())));
-            }
-            catch(const std::out_of_range &oor){
-                throw out_of_range_error(bytecode);
-            }
-            break;
-        }
-        //end of object
-        case 0xFF:{
-            break;
-        }
-        //else just exit error
         default:{
-            throw bytecode_error(bytecode);
-            break;
+            throw bytecode_error(subset);
         }
+        }
+        break;
+    }
+    //null
+    case 0x84:{
+        res.push_back(nullptr);
+        break;
+    }
+    //sub-object
+    case 0x85:{
+        res.push_back(read_RTON());
+        break;
+    }
+    //array
+    case 0x86:{
+        uint8_t arr_begin = read<uint8_t>();
+
+        if (arr_begin == 0xfd){
+            size_t arr_size = unsigned_RTON_num2int(read_RTON_num());
+
+            json arr = json::array();
+            for (size_t i = 0; i < arr_size; ++i) arr.push_back(read_RTON_block()[0]);
+
+            res.push_back(arr);
+
+            uint8_t arr_end = read<uint8_t>();
+            if (arr_end != 0xfe) throw bytecode_error(arr_end);
+        }
+        else throw bytecode_error(arr_begin);
+        break;
+    }
+    //cached string
+    case 0x90:{
+        uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+
+        char temp[buffer + 1];
+        input.read(temp, buffer);
+        temp[buffer] = 0;
+
+        debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
+        stack_0x91.push_back(temp);
+
+        res.push_back(stack_0x91[stack_0x91.size() - 1]);
+        break;
+    }
+    //recall
+    case 0x91:{
+        try{
+            res.push_back(stack_0x91.at(unsigned_RTON_num2int(read_RTON_num())));
+        }
+        catch(const std::out_of_range &oor){
+            throw out_of_range_error(bytecode);
+        }
+        break;
+    }
+    //cached utf-8 string
+    case 0x92:{
+        uint64_t buffer = unsigned_RTON_num2int(read_RTON_num());
+        buffer = unsigned_RTON_num2int(read_RTON_num());
+
+        char temp[buffer + 1];
+        input.read(temp, buffer);
+        temp[buffer] = 0;
+
+        debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
+        stack_0x93.push_back(temp);
+
+        res.push_back(stack_0x93[stack_0x93.size() - 1]);
+        break;
+    }
+    //recall
+    case 0x93:{
+        try{
+            res.push_back(stack_0x93.at(unsigned_RTON_num2int(read_RTON_num())));
+        }
+        catch(const std::out_of_range &oor){
+            throw out_of_range_error(bytecode);
+        }
+        break;
+    }
+    //end of object
+    case 0xFF:{
+        break;
+    }
+    //else just exit error
+    default:{
+        throw bytecode_error(bytecode);
+    }
     }
     return res;
 }
 
 json read_RTON(){
-    json res;
-    while(true){
-        std::string key;
-        json js_key;
-        js_key = read_RTON_block();
-        if (js_key.size() == 0) return res;
-        else{
-            if (!js_key[0].is_string()) throw key_error();
-            key = js_key[0];
-        }
-
+    json res, js_key = read_RTON_block();
+    while(js_key.size() > 0){
         //prevent push entire array lol
-        json value = read_RTON_block()[0];
-        res[key] = value;
+        if (!js_key[0].is_string()) throw key_error();
+
+        res[js_key[0].get<std::string>()] = read_RTON_block()[0];
+
+        js_key = read_RTON_block();
     }
+    return res;
 }
 
 json json_decode(){
@@ -405,8 +403,7 @@ json json_decode(){
     uint32_t RTON_ver = read<uint32_t>();
     debug_js["RTON stats"]["RTON version"] = RTON_ver;
 
-    json js;
-    js = read_RTON();
+    json js = read_RTON();
 
     if (input.peek() == EOF) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
     else{
