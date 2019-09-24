@@ -12,7 +12,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 endif()
 
-file(GLOB SOURCES src/*.cpp lib/*.hpp)
+file(GLOB SOURCES src/*.cpp include/*.hpp lib/*.hpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 # conan.io for non-window
@@ -32,8 +32,8 @@ set(VERSION_PATCH 4)
 # configure a header file to pass some of the CMake settings
 # to the source code
 configure_file(
-  "${PROJECT_SOURCE_DIR}/rton-json.h.in"
-  "${PROJECT_BINARY_DIR}/rton-json.h"
+  "${PROJECT_SOURCE_DIR}/version.hpp.in"
+  "${PROJECT_BINARY_DIR}/version.hpp"
 )
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")

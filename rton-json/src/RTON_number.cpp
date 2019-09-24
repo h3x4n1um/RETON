@@ -1,14 +1,15 @@
 #include <climits>
 #include <cmath>
 #include <cstdint>
-#include <vector>
+
+#include "include/RTON_number.hpp"
 
 constexpr double log256(double q){
     return log2(q) / 8;
 }
 
-std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
-    std::vector <uint8_t> res;
+vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
+    vector <uint8_t> res;
     if (q <= 0x7f){
         res.push_back(q);
         return res;
@@ -22,7 +23,7 @@ std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
     return res;
 }
 
-uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q){
+uint64_t unsigned_RTON_num2int(vector <uint8_t> q){
     if (q.size() == 1){
         if (q[0] > 0x7f) return UINT_MAX; //return max when RTON number has 1 byte and > 0x7f
         else return q[0];

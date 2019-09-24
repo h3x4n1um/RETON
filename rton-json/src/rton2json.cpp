@@ -1,37 +1,11 @@
-#include <fstream>
-#include <sstream>
+#include "include/rton-json.hpp"
 
-#include <nlohmann/json.hpp>
+#include "include/error.hpp"
+#include "include/rton2json.hpp"
+#include "include/RTON_number.hpp"
 
-#include "lib/fifo_map.hpp"
-
-//a workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
-//https://github.com/nlohmann/json/issues/485
-template<class K, class V, class dummy_compare, class A>
-using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
-using json = nlohmann::basic_json<workaround_fifo_map>;
-
-//import from error.cpp
-int bytecode_error(uint8_t bytecode);
-int key_error();
-int out_of_range_error(uint8_t bytecode);
-int eof_error(char footer[5]);
-
-//import from main.cpp
-std::string to_hex_string(uint64_t q);
-std::string to_hex_string(std::vector <uint8_t> a);
-extern std::ifstream input;
-extern std::ofstream debug;
-extern json debug_js;
-
-//import from RTON_number.cpp
-std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
-uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
-
-std::vector <std::string> stack_0x91;
-std::vector <std::string> stack_0x93;
-
-json read_RTON();
+vector <string> stack_0x91;
+vector <string> stack_0x93;
 
 template <class T>
 T read(){
@@ -40,8 +14,8 @@ T read(){
     return res;
 }
 
-std::vector <uint8_t> read_RTON_num(){
-    std::vector <uint8_t> RTON_num;
+vector <uint8_t> read_RTON_num(){
+    vector <uint8_t> RTON_num;
     uint8_t sub_num;
     do{
         sub_num = read<uint8_t>();
@@ -231,7 +205,7 @@ json read_RTON_block(){
         input.read(temp, buffer);
         temp[buffer] = 0;
 
-        res.push_back(std::string(temp));
+        res.push_back(string(temp));
         break;
     }
     //utf-8 string
@@ -243,7 +217,7 @@ json read_RTON_block(){
         input.read(s, buffer);
         s[buffer] = 0;
 
-        res.push_back(std::string(s));
+        res.push_back(string(s));
         break;
     }
     //RTID
@@ -263,10 +237,10 @@ json read_RTON_block(){
             uint64_t first_uid = unsigned_RTON_num2int(read_RTON_num());
             uint32_t third_uid = read<uint32_t>();
 
-            std::stringstream ss;
-            ss << std::dec << first_uid << '.' << second_uid << '.' << std::hex << third_uid;
+            stringstream ss;
+            ss << dec << first_uid << '.' << second_uid << '.' << hex << third_uid;
 
-            res.push_back(std::string("RTID(") + ss.str() + '@' + s + ')');
+            res.push_back(string("RTID(") + ss.str() + '@' + s + ')');
             break;
         }
         case 0x3:{
@@ -284,7 +258,7 @@ json read_RTON_block(){
             input.read(s2, s2_buffer);
             s2[s2_buffer] = 0;
 
-            res.push_back(std::string("RTID(") + s2 + '@' + s1 + ')');
+            res.push_back(string("RTID(") + s2 + '@' + s1 + ')');
             break;
         }
         default:{
@@ -329,7 +303,7 @@ json read_RTON_block(){
         input.read(temp, buffer);
         temp[buffer] = 0;
 
-        debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = std::string(temp);
+        debug_js["RTON stats"]["0x91 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x91.size()))] = string(temp);
         stack_0x91.push_back(temp);
 
         res.push_back(stack_0x91[stack_0x91.size() - 1]);
@@ -340,7 +314,7 @@ json read_RTON_block(){
         try{
             res.push_back(stack_0x91.at(unsigned_RTON_num2int(read_RTON_num())));
         }
-        catch(const std::out_of_range &oor){
+        catch(const out_of_range &oor){
             throw out_of_range_error(bytecode);
         }
         break;
@@ -354,7 +328,7 @@ json read_RTON_block(){
         input.read(temp, buffer);
         temp[buffer] = 0;
 
-        debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = std::string(temp);
+        debug_js["RTON stats"]["0x93 stack"][to_hex_string(int2unsigned_RTON_num(stack_0x93.size()))] = string(temp);
         stack_0x93.push_back(temp);
 
         res.push_back(stack_0x93[stack_0x93.size() - 1]);
@@ -365,7 +339,7 @@ json read_RTON_block(){
         try{
             res.push_back(stack_0x93.at(unsigned_RTON_num2int(read_RTON_num())));
         }
-        catch(const std::out_of_range &oor){
+        catch(const out_of_range &oor){
             throw out_of_range_error(bytecode);
         }
         break;
@@ -388,7 +362,7 @@ json read_RTON(){
         //prevent push entire array lol
         if (!js_key[0].is_string()) throw key_error();
 
-        res[js_key[0].get<std::string>()] = read_RTON_block()[0];
+        res[js_key[0].get<string>()] = read_RTON_block()[0];
 
         js_key = read_RTON_block();
     }
@@ -405,7 +379,7 @@ json json_decode(){
 
     json js = read_RTON();
 
-    if (input.peek() == EOF) std::clog << "Missing \"DONE\" at EOF?" << std::endl;
+    if (input.peek() == EOF) clog << "Missing \"DONE\" at EOF?" << endl;
     else{
         char footer[5];
         input.read(footer, 4);

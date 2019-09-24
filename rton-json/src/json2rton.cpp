@@ -1,15 +1,10 @@
-#include <fstream>
 #include <regex>
 
-#include <nlohmann/json.hpp>
+#include "include/rton-json.hpp"
 
-#include "lib/fifo_map.hpp"
-
-//a workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
-//https://github.com/nlohmann/json/issues/485
-template<class K, class V, class dummy_compare, class A>
-using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<K>, A>;
-using json = nlohmann::basic_json<workaround_fifo_map>;
+#include "include/error.hpp"
+#include "include/json2rton.hpp"
+#include "include/RTON_number.hpp"
 
 const uint8_t float64               = 0x42;
 const uint8_t uRTON_t               = 0x48;
@@ -26,28 +21,11 @@ const uint8_t arr_begin             = 0xfd;
 const uint8_t arr_end               = 0xfe;
 const uint8_t object_end            = 0xff;
 
-//import from error.cpp
-int not_supported_json();
-
-//import from main.cpp
-std::string to_hex_string(std::vector <uint8_t> a);
-std::string to_hex_string(uint64_t q);
-extern std::ifstream input;
-extern std::ofstream debug;
-extern std::ofstream output;
-extern json debug_js;
-
-//import from RTON_number.cpp
-std::vector <uint8_t> int2unsigned_RTON_num(uint64_t q);
-uint64_t unsigned_RTON_num2int(std::vector <uint8_t> q);
-
-std::unordered_map <std::string, uint64_t> map_0x91;
-std::unordered_map <std::string, uint64_t> map_0x93;
-
-int write_RTON(json js);
+unordered_map <string, uint64_t> map_0x91;
+unordered_map <string, uint64_t> map_0x93;
 
 //https://en.wikipedia.org/wiki/UTF-8#Examples
-int get_utf8_size(std::string q){
+int get_utf8_size(string q){
     int utf8_size = 0;
     for (uint8_t i : q){
         if (i <= 0177) utf8_size += 1;
@@ -58,7 +36,7 @@ int get_utf8_size(std::string q){
     return utf8_size;
 }
 
-int write_unsigned_RTON_num(std::vector <uint8_t> a){
+int write_unsigned_RTON_num(vector <uint8_t> a){
     for (uint8_t i : a) output.write(reinterpret_cast<const char*> (&i), sizeof i);
     return 0;
 }
@@ -77,20 +55,20 @@ int write_RTON_block(json js){
         break;
     }
     case json::value_t::string:{
-        std::string temp = js.get<std::string>();
+        string temp = js.get<string>();
         //rtid
-        if (std::regex_match(temp, std::regex("RTID(.*@.*)"))){
+        if (regex_match(temp, regex("RTID(.*@.*)"))){
             output.write(reinterpret_cast<const char*> (&rtid), sizeof rtid);
 
             //delete "RTID(" and ")"
             temp.erase(temp.end() - 1);
             temp.erase(0, 5);
 
-            std::string first_string = temp.substr(temp.find("@") + 1),
+            string first_string = temp.substr(temp.find("@") + 1),
                         second_string = temp.substr(0, temp.find("@"));
 
             uint8_t subset;
-            if (std::regex_match(second_string, std::regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
+            if (regex_match(second_string, regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
             else subset = 0x3;
             debug_js["RTON stats"]["List of bytecodes"][to_hex_string((uint64_t) output.tellp() - 1)] = to_hex_string(rtid*0x100 + subset);
             output.write(reinterpret_cast<const char*> (&subset), sizeof subset);
@@ -103,7 +81,7 @@ int write_RTON_block(json js){
                 second_string = second_string.substr(second_string.find(".") + 1);
                 uint64_t second_uid = strtoull(second_string.c_str(), NULL, 10);
                 second_string = second_string.substr(second_string.find(".") + 1);
-                int32_t third_uid = std::stoi(second_string, nullptr, 16);
+                int32_t third_uid = stoi(second_string, nullptr, 16);
 
                 write_unsigned_RTON_num(int2unsigned_RTON_num(second_uid));
                 write_unsigned_RTON_num(int2unsigned_RTON_num(first_uid));
@@ -206,7 +184,7 @@ int write_RTON_block(json js){
 
 int write_RTON(json js){
     try{
-        for (auto i : js.get<std::map <std::string, json> >()){
+        for (auto i : js.get<map <string, json> >()){
             write_RTON_block(i.first);
             write_RTON_block(i.second);
         }
