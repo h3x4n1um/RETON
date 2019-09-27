@@ -8,9 +8,10 @@ project(rton-json CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall")
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 endif()
+message(${CMAKE_CXX_COMPILER_ID})
 
 file(GLOB SOURCES src/*.cpp include/*.hpp lib/*.hpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
@@ -23,6 +24,15 @@ endif()
 
 # require nlohmann_json
 find_package(nlohmann_json 3.7.0 REQUIRED)
+
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    # 64 bits
+	set(ARCHITECTURE "64-bit")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    # 32 bits
+	set(ARCHITECTURE "32-bit")
+endif()
+message(${ARCHITECTURE})
 
 # semver
 set(VERSION_MAJOR 2)

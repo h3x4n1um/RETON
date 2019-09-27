@@ -159,6 +159,7 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
 int main(const int argc, const char *argv[]){
     clog << endl << "rton-json made by H3x4n1um" << endl
               << "Version: " << ver << endl
+              << "Architecture: " << architecture << endl
               << "Compiled on " << __DATE__ << " at " << __TIME__ << endl
               << "Credits: nlohmann for his awesome JSON parser and fifo_map" << endl << endl;
 

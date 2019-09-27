@@ -20,6 +20,7 @@ using workaround_fifo_map = nlohmann::fifo_map<K, V, nlohmann::fifo_map_compare<
 using json = nlohmann::basic_json<workaround_fifo_map>;
 
 const string ver = to_string(VERSION_MAJOR) + '.' + to_string(VERSION_MINOR) + '.' + to_string(VERSION_PATCH);
+const string architecture = ARCHITECTURE;
 
 extern ifstream input;
 extern ofstream output, debug;
