@@ -25,15 +25,6 @@ endif()
 # require nlohmann_json
 find_package(nlohmann_json 3.7.0 REQUIRED)
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    # 64 bits
-	set(ARCHITECTURE "64-bit")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    # 32 bits
-	set(ARCHITECTURE "32-bit")
-endif()
-message(${ARCHITECTURE})
-
 # semver
 set(VERSION_MAJOR 2)
 set(VERSION_MINOR 7)

@@ -8,7 +8,7 @@ constexpr double log256(double q){
     return log2(q) / 8;
 }
 
-vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
+vector <uint8_t> uint64_to_uRTON(uint64_t q){
     vector <uint8_t> res;
     if (q <= 0x7f){
         res.push_back(q);
@@ -18,12 +18,12 @@ vector <uint8_t> int2unsigned_RTON_num(uint64_t q){
     q = q / 0x100 * 2;
     if (temp > 0x7f) ++q;
     else temp += 0x80; //reverse & 0x7f
-    res = int2unsigned_RTON_num(q);
+    res = uint64_to_uRTON(q);
     res.insert(res.begin(), temp);
     return res;
 }
 
-uint64_t unsigned_RTON_num2int(vector <uint8_t> q){
+uint64_t uRTON_to_uint64(vector <uint8_t> q){
     if (q.size() == 1){
         if (q[0] > 0x7f) return UINT_MAX; //return max when RTON number has 1 byte and > 0x7f
         else return q[0];

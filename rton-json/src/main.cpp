@@ -10,29 +10,15 @@ ifstream input;
 ofstream output, debug;
 json debug_js, rton_list, json_list;
 
-string to_hex_string(uint64_t q){
-    stringstream ss;
-    ss << "0x" << hex << q;
-    return ss.str();
-}
-
-string to_hex_string(vector <uint8_t> a){
-    stringstream ss;
-    ss << "0x";
-    for (uint8_t i : a){
-        ss << setfill('0') << setw(2) << hex << (int) i;
-    }
-    return ss.str();
-}
-
 int help(const char *argv[]){
     cerr << "Usage:" << endl
-              << '\t' << argv[0] << " <file-or-folder-path>" << endl
-              << '\t' << argv[0] << " [options]" << " <file-or-folder-path>" << endl << endl
-              << "Options:" << endl
-              << "\t--help\t\tShow help (the thing you're looking at)" << endl
-              << "\t--rton2json\tForce covert RTON to JSON" << endl
-              << "\t--json2rton\tForce covert JSON to RTON" << endl;
+         << '\t' << argv[0] << " <file-or-folder-path>" << endl
+         << '\t' << argv[0] << " [options]" << " <file-or-folder-path>" << endl
+         << endl
+         << "Options:" << endl
+         << "\t--help\t\tShow help (the thing you're looking at)" << endl
+         << "\t--rton2json\tForce covert RTON to JSON" << endl
+         << "\t--json2rton\tForce covert JSON to RTON" << endl;
     cin.get();
     return 1;
 }
@@ -106,7 +92,8 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
             //log at the end
             debug << setw(4) << debug_js;
             debug.close();
-            clog << "Done" << endl << endl;
+            clog << "Done" << endl
+                 << endl;
 
             break;
         }
@@ -128,13 +115,15 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
             //log at the end
             debug << setw(4) << debug_js;
             debug.close();
-            clog << "Done" << endl << endl;
+            clog << "Done" << endl
+                 << endl;
 
             break;
         }
         default:{
             clog << " - Unknown" << endl
-                      << "Skipped" << endl << endl;
+                 << "Skipped" << endl
+                 << endl;
         }
         }
     }
@@ -150,18 +139,21 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
         else out_file = (file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton";
         filesystem::remove(out_file);
 
-        clog << "Error code: " << e << endl << endl;
+        clog << "Error code: " << e << endl
+             << endl;
         return e;
     }
     return 0;
 }
 
 int main(const int argc, const char *argv[]){
-    clog << endl << "rton-json made by H3x4n1um" << endl
-              << "Version: " << ver << endl
-              << "Architecture: " << architecture << endl
-              << "Compiled on " << __DATE__ << " at " << __TIME__ << endl
-              << "Credits: nlohmann for his awesome JSON parser and fifo_map" << endl << endl;
+    clog << endl
+         << "rton-json made by H3x4n1um" << endl
+         << "Version: " << ver << endl
+         << architecture << " executable" << endl
+         << "Compiled on " << __DATE__ << " at " << __TIME__ << endl
+         << "Credits: nlohmann for his awesome JSON parser and fifo_map" << endl
+         << endl;
 
     filesystem::path path;
     switch (argc){
