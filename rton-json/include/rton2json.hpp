@@ -16,6 +16,6 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 template <class T>
 T read();
 json json_decode();
-vector <uint8_t> read_RTON_num();
+vector <uint8_t> read_uRTON_t();
 json read_RTON();
 json read_RTON_block();
