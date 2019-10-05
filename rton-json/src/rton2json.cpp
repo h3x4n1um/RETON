@@ -46,19 +46,9 @@ json read_RTON_block(){
         res.push_back(read<int8_t>());
         break;
     }
-    //0???
-    case 0x9:{
-        res.push_back(0);
-        break;
-    }
     //uint8_t
     case 0xa:{
         res.push_back(read<uint8_t>());
-        break;
-    }
-    //0???
-    case 0xb:{
-        res.push_back(0);
         break;
     }
     //int16_t
@@ -66,19 +56,9 @@ json read_RTON_block(){
         res.push_back(read<int16_t>());
         break;
     }
-    //0???
-    case 0x11:{
-        res.push_back(0);
-        break;
-    }
     //uint16_t
     case 0x12:{
         res.push_back(read<uint16_t>());
-        break;
-    }
-    //0???
-    case 0x13:{
-        res.push_back(0);
         break;
     }
     //int32_t
@@ -86,33 +66,13 @@ json read_RTON_block(){
         res.push_back(read<int32_t>());
         break;
     }
-    //0???
-    case 0x21:{
-        res.push_back(0);
-        break;
-    }
     //float32
     case 0x22:{
-        res.push_back(read<float>());
-        break;
-    }
-    //0.0???
-    case 0x23:{
-        res.push_back(0.0);
-        break;
-    }
-    //unsigned RTON number
-    case 0x24:{
-        res.push_back(uRTON_t2uint64_t(read_uRTON_t()));
-        break;
-    }
-    //RTON number
-    case 0x25:{
-        int64_t num = uRTON_t2uint64_t(read_uRTON_t());
-        if (num % 2) num = -(num + 1);
-        num /= 2;
-
-        res.push_back(num);
+        float tmp = read<float>();
+        if (isinf(tmp)) res.push_back(tmp > 0 ? "Infinity" : "-Infinity");
+        else
+            if (isnan(tmp)) res.push_back("NaN");
+            else res.push_back(tmp);
         break;
     }
     //uint32_t
@@ -120,81 +80,23 @@ json read_RTON_block(){
         res.push_back(read<uint32_t>());
         break;
     }
-    //0???
-    case 0x27:{
-        res.push_back(0);
-        break;
-    }
-    //unsigned RTON number???
-    case 0x28:{
-        res.push_back(uRTON_t2uint64_t(read_uRTON_t()));
-        break;
-    }
-    //RTON number???
-    case 0x29:{
-        int64_t num = uRTON_t2uint64_t(read_uRTON_t());
-        if (num % 2) num = -(num + 1);
-        num /= 2;
-
-        res.push_back(num);
-        break;
-    }
     //int64_t
     case 0x40:{
         res.push_back(read<int64_t>());
         break;
     }
-    //0???
-    case 0x41:{
-        res.push_back(0);
-        break;
-    }
     //float64
     case 0x42:{
-        res.push_back(read<double>());
-        break;
-    }
-    //0.0???
-    case 0x43:{
-        res.push_back(0.0);
-        break;
-    }
-    //unsigned RTON number???
-    case 0x44:{
-        res.push_back(uRTON_t2uint64_t(read_uRTON_t()));
-        break;
-    }
-    //RTON number???
-    case 0x45:{
-        int64_t num = uRTON_t2uint64_t(read_uRTON_t());
-        if (num % 2) num = -(num + 1);
-        num /= 2;
-
-        res.push_back(num);
+        double tmp = read<double>();
+        if (isinf(tmp)) res.push_back(tmp > 0 ? "Infinity" : "-Infinity");
+        else
+            if (isnan(tmp)) res.push_back("NaN");
+            else res.push_back(tmp);
         break;
     }
     //uint64_t
     case 0x46:{
         res.push_back(read<uint64_t>());
-        break;
-    }
-    //0???
-    case 0x47:{
-        res.push_back(0);
-        break;
-    }
-    //unsigned RTON number???
-    case 0x48:{
-        res.push_back(uRTON_t2uint64_t(read_uRTON_t()));
-        break;
-    }
-    //RTON number???
-    case 0x49:{
-        int64_t num = uRTON_t2uint64_t(read_uRTON_t());
-        if (num % 2) num = -(num + 1);
-        num /= 2;
-
-        res.push_back(num);
         break;
     }
     //string
@@ -235,7 +137,7 @@ json read_RTON_block(){
 
             uint64_t second_uid = uRTON_t2uint64_t(read_uRTON_t());
             uint64_t first_uid = uRTON_t2uint64_t(read_uRTON_t());
-            int32_t third_uid = read<int32_t>();
+            uint32_t third_uid = read<uint32_t>();
 
             stringstream ss;
             ss << dec << first_uid << '.' << second_uid << '.' << hex << third_uid;
@@ -348,6 +250,49 @@ json read_RTON_block(){
     case 0xFF:{
         break;
     }
+
+    //0???
+    case 0x9:
+    case 0xb:
+    case 0x11:
+    case 0x13:
+    case 0x21:
+    case 0x27:
+    case 0x41:
+    case 0x47:{
+        res.push_back(0);
+        break;
+    }
+
+    //0.0???
+    case 0x23:
+    case 0x43:{
+        res.push_back(0.0);
+        break;
+    }
+
+    //unsigned RTON number
+    case 0x24:
+    case 0x28:
+    case 0x44:
+    case 0x48:{
+        res.push_back(uRTON_t2uint64_t(read_uRTON_t()));
+        break;
+    }
+
+    //RTON number
+    case 0x25:
+    case 0x29:
+    case 0x45:
+    case 0x49:{
+        int64_t num = uRTON_t2uint64_t(read_uRTON_t());
+        if (num % 2) num = -(num + 1);
+        num /= 2;
+
+        res.push_back(num);
+        break;
+    }
+
     //else just exit error
     default:{
         throw bytecode_error(bytecode);

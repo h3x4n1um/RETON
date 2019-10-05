@@ -28,7 +28,7 @@ find_package(nlohmann_json 3.7.0 REQUIRED)
 # semver
 set(VERSION_MAJOR 2)
 set(VERSION_MINOR 7)
-set(VERSION_PATCH 4)
+set(VERSION_PATCH 5)
 
 # configure a header file to pass some of the CMake settings
 # to the source code

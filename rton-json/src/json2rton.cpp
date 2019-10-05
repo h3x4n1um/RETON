@@ -25,8 +25,8 @@ unordered_map <string, uint64_t> map_0x91;
 unordered_map <string, uint64_t> map_0x93;
 
 //https://en.wikipedia.org/wiki/UTF-8#Examples
-int get_utf8_size(string q){
-    int utf8_size = 0;
+size_t get_utf8_size(string q){
+    size_t utf8_size = 0;
     for (uint8_t i : q){
         if (i <= 0177) utf8_size += 1;
         if (i >= 0302 && i <= 0337) utf8_size += 1;
@@ -65,7 +65,7 @@ int write_RTON_block(json js){
             temp.erase(0, 5);
 
             string first_string = temp.substr(temp.find("@") + 1),
-                        second_string = temp.substr(0, temp.find("@"));
+                   second_string = temp.substr(0, temp.find("@"));
 
             uint8_t subset;
             if (regex_match(second_string, regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
@@ -77,11 +77,13 @@ int write_RTON_block(json js){
             write_uRTON_t(uint64_t2uRTON_t(first_string.size()));
             output << first_string;
             if (subset == 0x2){
-                uint64_t first_uid = strtoull(second_string.c_str(), NULL, 10);
-                second_string = second_string.substr(second_string.find(".") + 1);
-                uint64_t second_uid = strtoull(second_string.c_str(), NULL, 10);
-                second_string = second_string.substr(second_string.find(".") + 1);
-                int32_t third_uid = stoi(second_string, nullptr, 16);
+                stringstream raw_ss(second_string), ss;
+                string tmp_str;
+                uint64_t first_uid, second_uid;
+                uint32_t third_uid;
+
+                while(getline(raw_ss, tmp_str, '.')) ss << tmp_str << " ";
+                ss >> first_uid >> second_uid >> hex >> third_uid;
 
                 write_uRTON_t(uint64_t2uRTON_t(second_uid));
                 write_uRTON_t(uint64_t2uRTON_t(first_uid));
@@ -93,43 +95,52 @@ int write_RTON_block(json js){
                 output << second_string;
             }
         }
-        //normal string
-        else{
-            size_t utf8_size = get_utf8_size(temp);
-            //ascii
-            if (utf8_size == temp.size()){
-                if (map_0x91[temp] == 0){
-                    debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(ascii);
-                    output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
-                    write_uRTON_t(uint64_t2uRTON_t(temp.size()));
-                    output << temp;
+        //NaN
+        else if (temp.find("NaN") != string::npos){
+            double dnan = numeric_limits<double>::signaling_NaN();
+            output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
+            output.write(reinterpret_cast<const char*> (&dnan), sizeof dnan);
+        }
+        //Infinity
+        else if (temp.find("Infinity") != string::npos){
+            double dinf = numeric_limits<double>::infinity();
+            if (temp[0] == '-') dinf = -dinf;
+            output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
+            output.write(reinterpret_cast<const char*> (&dinf), sizeof dinf);
+        }
+        //normal ascii string
+        else if (get_utf8_size(temp) == temp.size()){
+            if (map_0x91[temp] == 0){
+                debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(ascii);
+                output.write(reinterpret_cast<const char*> (&ascii), sizeof ascii);
+                write_uRTON_t(uint64_t2uRTON_t(temp.size()));
+                output << temp;
 
-                    debug_js["RTON stats"]["0x91 stack"][to_hex_string(uint64_t2uRTON_t(map_0x91.size() - 1))] = temp;
-                    map_0x91[temp] = map_0x91.size();
-                }
-                else{
-                    debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(ascii_stack);
-                    output.write(reinterpret_cast<const char*> (&ascii_stack), sizeof ascii_stack);
-                    write_uRTON_t(uint64_t2uRTON_t(map_0x91[temp] - 1));
-                }
+                debug_js["RTON stats"]["0x91 stack"][to_hex_string(uint64_t2uRTON_t(map_0x91.size() - 1))] = temp;
+                map_0x91[temp] = map_0x91.size();
             }
-            //utf-8
             else{
-                if (map_0x93[temp] == 0){
-                    debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(utf8);
-                    output.write(reinterpret_cast<const char*> (&utf8), sizeof utf8);
-                    write_uRTON_t(uint64_t2uRTON_t(utf8_size));
-                    write_uRTON_t(uint64_t2uRTON_t(temp.size()));
-                    output << temp;
+                debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(ascii_stack);
+                output.write(reinterpret_cast<const char*> (&ascii_stack), sizeof ascii_stack);
+                write_uRTON_t(uint64_t2uRTON_t(map_0x91[temp] - 1));
+            }
+        }
+        //normal utf-8 string
+        else{
+            if (map_0x93[temp] == 0){
+                debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(utf8);
+                output.write(reinterpret_cast<const char*> (&utf8), sizeof utf8);
+                write_uRTON_t(uint64_t2uRTON_t(get_utf8_size(temp)));
+                write_uRTON_t(uint64_t2uRTON_t(temp.size()));
+                output << temp;
 
-                    debug_js["RTON stats"]["0x93 stack"][to_hex_string(uint64_t2uRTON_t(map_0x93.size() - 1))] = temp;
-                    map_0x93[temp] = map_0x93.size();
-                }
-                else{
-                    debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(utf8_stack);
-                    output.write(reinterpret_cast<const char*> (&utf8_stack), sizeof utf8_stack);
-                    write_uRTON_t(uint64_t2uRTON_t(map_0x93[temp] - 1));
-                }
+                debug_js["RTON stats"]["0x93 stack"][to_hex_string(uint64_t2uRTON_t(map_0x93.size() - 1))] = temp;
+                map_0x93[temp] = map_0x93.size();
+            }
+            else{
+                debug_js["RTON stats"]["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(utf8_stack);
+                output.write(reinterpret_cast<const char*> (&utf8_stack), sizeof utf8_stack);
+                write_uRTON_t(uint64_t2uRTON_t(map_0x93[temp] - 1));
             }
         }
         break;

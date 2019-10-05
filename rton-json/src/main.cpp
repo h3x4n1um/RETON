@@ -201,10 +201,10 @@ int main(const int argc, const char *argv[]){
     json_list["Total files"] = json_list["JSON files"].size();
 
     //log processed json & rton
-    debug.open(path / "json2rton" / "json2rton.json");
+    debug.open(path / "log" / "json2rton.json");
     debug << setw(4) << json_list;
     debug.close();
-    debug.open(path / "rton2json" / "rton2json.json");
+    debug.open(path / "log" / "rton2json.json");
     debug << setw(4) << rton_list;
     debug.close();
 
