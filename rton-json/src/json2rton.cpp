@@ -95,14 +95,14 @@ int write_RTON_block(json js){
                 output << second_string;
             }
         }
-        //NaN
-        else if (temp.find("NaN") != string::npos){
+        //nan
+        else if (temp.find("nan") != string::npos){
             double dnan = numeric_limits<double>::signaling_NaN();
             output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
             output.write(reinterpret_cast<const char*> (&dnan), sizeof dnan);
         }
-        //Infinity
-        else if (temp.find("Infinity") != string::npos){
+        //inf
+        else if (temp.find("inf") != string::npos){
             double dinf = numeric_limits<double>::infinity();
             if (temp[0] == '-') dinf = -dinf;
             output.write(reinterpret_cast<const char*> (&float64), sizeof float64);

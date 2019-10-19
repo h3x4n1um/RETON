@@ -28,12 +28,7 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 #endif
 const string architecture = ARCHITECTURE;
 
-#if __has_include("version.hpp")
-#  include "version.hpp"
-    const string ver = to_string(VERSION_MAJOR) + '.' + to_string(VERSION_MINOR) + '.' + to_string(VERSION_PATCH);
-#else
-  const string ver = "Unknown";
-#endif // VERSION_HPP
+const string ver = "2.7.6";
 
 extern ifstream input;
 extern ofstream output, debug;

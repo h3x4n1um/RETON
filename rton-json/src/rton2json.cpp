@@ -69,9 +69,9 @@ json read_RTON_block(){
     //float32
     case 0x22:{
         float tmp = read<float>();
-        if (isinf(tmp)) res.push_back(tmp > 0 ? "Infinity" : "-Infinity");
+        if (isinf(tmp)) res.push_back(tmp > 0 ? "inf" : "-inf");
         else
-            if (isnan(tmp)) res.push_back("NaN");
+            if (isnan(tmp)) res.push_back("nan");
             else res.push_back(tmp);
         break;
     }
@@ -88,9 +88,9 @@ json read_RTON_block(){
     //float64
     case 0x42:{
         double tmp = read<double>();
-        if (isinf(tmp)) res.push_back(tmp > 0 ? "Infinity" : "-Infinity");
+        if (isinf(tmp)) res.push_back(tmp > 0 ? "inf" : "-inf");
         else
-            if (isnan(tmp)) res.push_back("NaN");
+            if (isnan(tmp)) res.push_back("nan");
             else res.push_back(tmp);
         break;
     }

@@ -11,13 +11,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 endif()
-message(${CMAKE_CXX_COMPILER_ID})
 
 file(GLOB SOURCES src/*.cpp include/*.hpp lib/*.hpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-# conan.io for non-window
-if (NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+# conan.io for non-mingw
+if (NOT MINGW)
 	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 	conan_basic_setup()
 endif()
@@ -25,20 +24,7 @@ endif()
 # require nlohmann_json
 find_package(nlohmann_json 3.7.0 REQUIRED)
 
-# semver
-set(VERSION_MAJOR 2)
-set(VERSION_MINOR 7)
-set(VERSION_PATCH 5)
-
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file(
-  "${PROJECT_SOURCE_DIR}/version.hpp.in"
-  "${PROJECT_BINARY_DIR}/version.hpp"
-)
-
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
-include_directories("${PROJECT_BINARY_DIR}")
 
 add_executable(rton-json ${SOURCES})
 
