@@ -28,7 +28,7 @@ using json = nlohmann::basic_json<workaround_fifo_map>;
 #endif
 const string architecture = ARCHITECTURE;
 
-const string ver = "2.7.6";
+const string ver = "2.7.7";
 
 extern ifstream input;
 extern ofstream output, debug;

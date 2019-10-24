@@ -96,13 +96,13 @@ int write_RTON_block(json js){
             }
         }
         //nan
-        else if (temp.find("nan") != string::npos){
+        else if (temp == "nan"){
             double dnan = numeric_limits<double>::signaling_NaN();
             output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
             output.write(reinterpret_cast<const char*> (&dnan), sizeof dnan);
         }
         //inf
-        else if (temp.find("inf") != string::npos){
+        else if (temp == "inf" || temp == "-inf"){
             double dinf = numeric_limits<double>::infinity();
             if (temp[0] == '-') dinf = -dinf;
             output.write(reinterpret_cast<const char*> (&float64), sizeof float64);
