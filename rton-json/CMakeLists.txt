@@ -15,14 +15,9 @@ endif()
 file(GLOB SOURCES src/*.cpp include/*.hpp lib/*.hpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
-# conan.io for non-mingw
-if (NOT MINGW)
-	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	conan_basic_setup()
-endif()
-
 # require nlohmann_json
-find_package(nlohmann_json 3.7.0 REQUIRED)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(third_party/json)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
