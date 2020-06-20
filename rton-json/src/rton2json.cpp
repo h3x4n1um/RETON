@@ -103,11 +103,11 @@ json read_RTON_block(){
     case 0x81:{
         uint64_t buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-        char temp[buffer + 1];
-        input.read(temp, buffer);
+        unique_ptr<char[]> temp(new char[buffer + 1]);
+        input.read(temp.get(), buffer);
         temp[buffer] = 0;
 
-        res.push_back(string(temp));
+        res.push_back(string(temp.get()));
         break;
     }
     //utf-8 string
@@ -115,11 +115,11 @@ json read_RTON_block(){
         uint64_t buffer = uRTON_t2uint64_t(read_uRTON_t());
         buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-        char s[buffer + 1];
-        input.read(s, buffer);
+        unique_ptr<char[]> s(new char[buffer + 1]);
+        input.read(s.get(), buffer);
         s[buffer] = 0;
 
-        res.push_back(string(s));
+        res.push_back(string(s.get()));
         break;
     }
     //RTID
@@ -131,8 +131,8 @@ json read_RTON_block(){
             uint64_t buffer = uRTON_t2uint64_t(read_uRTON_t());
             buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-            char s[buffer + 1];
-            input.read(s, buffer);
+            unique_ptr<char[]> s(new char[buffer + 1]);
+            input.read(s.get(), buffer);
             s[buffer] = 0;
 
             uint64_t second_uid = uRTON_t2uint64_t(read_uRTON_t());
@@ -142,25 +142,25 @@ json read_RTON_block(){
             stringstream ss;
             ss << dec << first_uid << '.' << second_uid << '.' << hex << third_uid;
 
-            res.push_back(string("RTID(") + ss.str() + '@' + s + ')');
+            res.push_back(string("RTID(") + ss.str() + '@' + s.get() + ')');
             break;
         }
         case 0x3:{
             uint64_t s1_buffer = uRTON_t2uint64_t(read_uRTON_t());
             s1_buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-            char s1[s1_buffer + 1];
-            input.read(s1, s1_buffer);
+            unique_ptr<char[]> s1(new char[s1_buffer + 1]);
+            input.read(s1.get(), s1_buffer);
             s1[s1_buffer] = 0;
 
             uint64_t s2_buffer = uRTON_t2uint64_t(read_uRTON_t());
             s2_buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-            char s2[s2_buffer + 1];
-            input.read(s2, s2_buffer);
+            unique_ptr<char[]> s2(new char[s2_buffer + 1]);
+            input.read(s2.get(), s2_buffer);
             s2[s2_buffer] = 0;
 
-            res.push_back(string("RTID(") + s2 + '@' + s1 + ')');
+            res.push_back(string("RTID(") + s2.get() + '@' + s1.get() + ')');
             break;
         }
         default:{
@@ -201,12 +201,12 @@ json read_RTON_block(){
     case 0x90:{
         uint64_t buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-        char temp[buffer + 1];
-        input.read(temp, buffer);
+        unique_ptr<char[]> temp(new char[buffer + 1]);
+        input.read(temp.get(), buffer);
         temp[buffer] = 0;
 
-        debug_js["RTON stats"]["0x91 stack"][to_hex_string(uint64_t2uRTON_t(stack_0x91.size()))] = string(temp);
-        stack_0x91.push_back(temp);
+        debug_js["RTON stats"]["0x91 stack"][to_hex_string(uint64_t2uRTON_t(stack_0x91.size()))] = string(temp.get());
+        stack_0x91.push_back(temp.get());
 
         res.push_back(stack_0x91[stack_0x91.size() - 1]);
         break;
@@ -226,12 +226,12 @@ json read_RTON_block(){
         uint64_t buffer = uRTON_t2uint64_t(read_uRTON_t());
         buffer = uRTON_t2uint64_t(read_uRTON_t());
 
-        char temp[buffer + 1];
-        input.read(temp, buffer);
+        unique_ptr<char[]> temp(new char[buffer + 1]);
+        input.read(temp.get(), buffer);
         temp[buffer] = 0;
 
-        debug_js["RTON stats"]["0x93 stack"][to_hex_string(uint64_t2uRTON_t(stack_0x93.size()))] = string(temp);
-        stack_0x93.push_back(temp);
+        debug_js["RTON stats"]["0x93 stack"][to_hex_string(uint64_t2uRTON_t(stack_0x93.size()))] = string(temp.get());
+        stack_0x93.push_back(temp.get());
 
         res.push_back(stack_0x93[stack_0x93.size() - 1]);
         break;
