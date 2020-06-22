@@ -32,7 +32,7 @@ const string ver = "2.7.7";
 
 extern ifstream input;
 extern ofstream output, debug;
-extern json debug_js, rton_list, json_list;
+extern json rton_list, json_list, rton_info;
 
 inline string to_hex_string(uint64_t q){
     stringstream ss;
@@ -47,4 +47,9 @@ inline string to_hex_string(vector <uint8_t> a){
         ss << setfill('0') << setw(2) << hex << (int) i;
     }
     return ss.str();
+}
+
+inline void write_debug_js(json debug_js){
+    debug_js["RTON info"] = rton_info;
+    debug << setw(4) << debug_js;
 }

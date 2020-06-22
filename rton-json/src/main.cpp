@@ -8,7 +8,7 @@
 
 ifstream input;
 ofstream output, debug;
-json debug_js, rton_list, json_list;
+json debug_js, rton_list, json_list, rton_info;
 
 int help(const char *argv[]){
     cerr << "Usage:" << endl
@@ -25,6 +25,7 @@ int help(const char *argv[]){
 
 int process_file(filesystem::path file_name, const int argc, const char *argv[]){
     debug_js.clear();
+    rton_info.clear();
     clog << "Processing file " << file_name;
 
     //info
@@ -67,10 +68,10 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
     debug_js["Info"]["File"] = file_name.string();
 
     //init RTON Stats
-    debug_js["RTON stats"]["RTON version"] = 1; //not sure if it ever higher than 1
-    debug_js["RTON stats"]["List of bytecodes"]["Offset"] = "Bytecode";
-    debug_js["RTON stats"]["0x91 stack"]["Unsigned RTON number"] = "String";
-    debug_js["RTON stats"]["0x93 stack"]["Unsigned RTON number"] = "UTF-8 string";
+    rton_info["RTON version"] = 1; //not sure if it ever higher than 1
+    rton_info["List of bytecodes"]["Offset"] = "Bytecode";
+    rton_info["0x91 stack"]["Unsigned RTON number"] = "String";
+    rton_info["0x93 stack"]["Unsigned RTON number"] = "UTF-8 string";
 
     try{
         switch(file_type){
@@ -90,7 +91,8 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
             output.close();
 
             //log at the end
-            debug << setw(4) << debug_js;
+            write_debug_js(debug_js);
+
             debug.close();
             clog << "Done" << endl
                  << endl;
@@ -113,7 +115,8 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
             output.close();
 
             //log at the end
-            debug << setw(4) << debug_js;
+            write_debug_js(debug_js);
+
             debug.close();
             clog << "Done" << endl
                  << endl;
@@ -128,6 +131,8 @@ int process_file(filesystem::path file_name, const int argc, const char *argv[])
         }
     }
     catch (int e){
+        write_debug_js(debug_js);
+
         //reset fstream state
         input.close();
         output.close();
