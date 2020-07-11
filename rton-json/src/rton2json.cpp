@@ -12,8 +12,8 @@ T get_data(const std::vector <uint8_t> &byte_array, std::size_t &pos){
     return *reinterpret_cast<T*>(sub_byte_array.data());
 }
 
-std::vector <uint8_t> get_uRTON_t(const std::vector<uint8_t> byte_array, size_t &pos){
-    int pre_pos = pos;
+std::vector <uint8_t> get_uRTON_t(const std::vector<uint8_t> &byte_array, std::size_t &pos){
+    std::size_t pre_pos = pos;
     for(;byte_array.at(pos) > 0x7f; ++pos);
     ++pos;
     return std::vector <uint8_t>(std::next(byte_array.begin(), pre_pos), std::next(byte_array.begin(), pos));
@@ -172,10 +172,10 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
         uint8_t arr_begin = get_data<decltype(arr_begin)>(byte_array, pos);
 
         if (arr_begin == 0xfd){
-            size_t arr_size = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
+            std::size_t arr_size = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
 
             json_fifo::json arr = json_fifo::json::array();
-            for (size_t i = 0; i < arr_size; ++i) arr.push_back(decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info));
+            for (std::size_t i = 0; i < arr_size; ++i) arr.push_back(decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info));
 
             uint8_t arr_end = get_data<decltype(arr_end)>(byte_array, pos);
             if (arr_end != 0xfe) throw std::logic_error(chunk_error(pos, arr_end));
