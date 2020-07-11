@@ -1,28 +1,7 @@
-#include "include/rton-json.hpp"
-
 #include "include/error.hpp"
 
-int bytecode_error(uint8_t bytecode){
-    cerr << "Error reading bytecode " << hex << showbase << (int) bytecode << " at " << (uint64_t) input.tellg() - 1 << "!!!" << endl;
-    return 2;
-}
+#include "include/rton-json.hpp"
 
-int key_error(){
-    cerr << "Error! Key at " << hex << showbase << (uint64_t) input.tellg() - 1 << " is not a string!!!" << endl;
-    return 3;
-}
-
-int out_of_range_error(uint8_t bytecode){
-    cerr << "Error! " << hex << showbase << (int) bytecode << " stack overflow at " << (uint64_t) input.tellg() - 1 << endl;
-    return 4;
-}
-
-int eof_error(char footer[5]){
-    cerr << "Error! End of RTON reached, expected \"DONE\" but found \"" << footer << "\" at " << hex << showbase << (uint64_t) input.tellg() - 1 << endl;
-    return 5;
-}
-
-int not_supported_json(){
-    cerr << "Error! This file is a JSON but format is not supported" << endl;
-    return 6;
+std::string chunk_error(const std::size_t &pos, const uint8_t &chunk_type){
+    return "Error reading chunk type " + to_hex_string(chunk_type) + " at " + to_hex_string(pos-1) + "!!!";
 }

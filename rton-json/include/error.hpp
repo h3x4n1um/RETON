@@ -1,7 +1,5 @@
 #pragma once
 
-int bytecode_error(uint8_t bytecode);
-int eof_error(char footer[5]);
-int key_error();
-int not_supported_json();
-int out_of_range_error(uint8_t bytecode);
+#include <string>
+
+std::string chunk_error(const std::size_t &pos, const uint8_t &chunk_type);

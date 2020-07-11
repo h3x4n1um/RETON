@@ -1,11 +1,7 @@
-#include <climits>
-#include <cmath>
-#include <cstdint>
-
 #include "include/RTON_number.hpp"
 
-vector <uint8_t> uint64_t2uRTON_t(uint64_t q){
-    vector <uint8_t> res;
+std::vector <uint8_t> uint64_t2uRTON_t(uint64_t q){
+    std::vector <uint8_t> res;
     while(q > 0){
         uint8_t temp = q % 0x100;
         q = q / 0x100 * 2;
@@ -17,7 +13,7 @@ vector <uint8_t> uint64_t2uRTON_t(uint64_t q){
     return res;
 }
 
-uint64_t uRTON_t2uint64_t(vector <uint8_t> q){
+uint64_t uRTON_t2uint64_t(std::vector <uint8_t> q){
     if (q.size() == 1 && q[0] > 0x7f) return UINT64_MAX; //return max when RTON number has 1 byte and > 0x7f
     uint64_t near_last_byte, last_byte = 0;
     for (; q.size() > 0; q.pop_back()){
