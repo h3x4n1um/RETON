@@ -2,9 +2,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "include/rton-json.hpp"
-
 #include "include/json2rton.hpp"
+#include "include/rton-json.hpp"
 #include "include/rton2json.hpp"
 
 int help(const char *argv[]){
@@ -146,7 +145,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
         debug_js["RTON info"] = rton_info;
         debug << std::setw(4) << debug_js;
 
-        std::cout << e.what() << std::endl
+        std::cerr << e.what() << std::endl
                   << std::endl;
 
         //remove unfinished file

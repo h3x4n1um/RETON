@@ -2,6 +2,7 @@
 
 #include <regex>
 
+#include "include/error.hpp"
 #include "include/rton-json.hpp"
 #include "include/RTON_number.hpp"
 
@@ -49,13 +50,13 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         break;
     }
     case json_fifo::json::value_t::boolean:{
-        bool temp = js.get<bool>();
+        bool temp = js.get<decltype(temp)>();
         //rton_info["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(temp);
         res.push_back(temp);
         break;
     }
     case json_fifo::json::value_t::string:{
-        std::string temp = js.get<std::string>();
+        std::string temp = js.get<decltype(temp)>();
         //rtid
         if (regex_match(temp, std::regex("RTID(.*@.*)"))){
             res.push_back(CHUNK_TYPE::RTID);
@@ -160,7 +161,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
     }
     case json_fifo::json::value_t::number_unsigned:{
         //rton_info["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(uRTON_t);
-        uint64_t temp = js.get<uint64_t>();
+        uint64_t temp = js.get<decltype(temp)>();
         std::vector <uint8_t> byte_array = uint64_t2uRTON_t(temp);
 
         res.push_back(CHUNK_TYPE::uRTON_t);
@@ -169,7 +170,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
     }
     case json_fifo::json::value_t::number_float:{
         //rton_info["List of bytecodes"][to_hex_string(output.tellp())] = to_hex_string(float64);
-        double temp = js.get<double>();
+        double temp = js.get<decltype(temp)>();
         std::vector <uint8_t> byte_array = set_raw_data(temp);
 
         res.push_back(CHUNK_TYPE::FLOAT64);
@@ -202,7 +203,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         break;
     }
     default:{
-        throw std::logic_error("Error! This file is a JSON but format is not supported");
+        throw std::logic_error(json_error);
     }
     }
 
@@ -212,7 +213,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
 std::vector <uint8_t> encode_JSON(const json_fifo::json &js, std::unordered_map <std::string, uint64_t> &map_0x91, std::unordered_map <std::string, uint64_t> &map_0x93, json_fifo::json &rton_info){
     std::vector <uint8_t> res;
     try{
-        for (auto i : js.get<std::map <std::string, json_fifo::json> >()){
+        for (std::pair <std::string, json_fifo::json> i : js.get<std::map <std::string, json_fifo::json>>()){
             std::vector <uint8_t> tmp = encode_JSON_chunk(i.first, map_0x91, map_0x93, rton_info);
             res.insert(res.end(), tmp.begin(), tmp.end());
 
@@ -222,7 +223,7 @@ std::vector <uint8_t> encode_JSON(const json_fifo::json &js, std::unordered_map 
         res.push_back(CHUNK_TYPE::OBJECT_END);
     }
     catch(json_fifo::json::exception &e){
-        throw std::logic_error("Error! This file is a JSON but format is not supported");
+        throw std::logic_error(json_error);
     }
     return res;
 }

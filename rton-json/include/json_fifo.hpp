@@ -1,4 +1,7 @@
+#pragma once
+
 #include <nlohmann/json.hpp>
+
 #include "lib/fifo_map.hpp"
 
 namespace json_fifo{
