@@ -172,6 +172,8 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
         uint8_t arr_begin = get_data<decltype(arr_begin)>(byte_array, pos);
 
         if (arr_begin == 0xfd){
+            rton_info["List of chunks"][to_hex_string(pos-1)] = to_hex_string(arr_begin);
+
             std::size_t arr_size = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
 
             json_fifo::json arr = json_fifo::json::array();
@@ -179,6 +181,8 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
 
             uint8_t arr_end = get_data<decltype(arr_end)>(byte_array, pos);
             if (arr_end != 0xfe) throw std::logic_error(chunk_error(pos, arr_end));
+
+            rton_info["List of chunks"][to_hex_string(pos-1)] = to_hex_string(arr_end);
 
             return arr;
         }
