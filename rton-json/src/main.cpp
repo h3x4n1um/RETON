@@ -18,6 +18,8 @@ int help(const char *argv[]){
 }
 
 int process_file(const std::filesystem::path &file_name, const int &argc, const char *argv[], json_fifo::json &json_list, json_fifo::json &rton_list){
+    std::chrono::time_point<std::chrono::steady_clock> time_start = std::chrono::steady_clock::now();
+
     std::ifstream input;
     std::ofstream output, debug;
 
@@ -98,10 +100,6 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
             //log at the end
             debug_js["RTON info"] = rton_info;
             debug << std::setw(4) << debug_js;
-
-            std::cout << "Done" << std::endl
-                      << std::endl;
-
             break;
         }
         case RTON:{
@@ -128,16 +126,10 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
             //log at the end
             debug_js["RTON info"] = rton_info;
             debug << std::setw(4) << debug_js;
-
-            std::cout << "Done" << std::endl
-                      << std::endl;
-
             break;
         }
         default:{
-            std::cout << " - Unknown" << std::endl
-                      << "Skipped" << std::endl
-                      << std::endl;
+            std::cout << " - Unknown" << std::endl;
         }
         }
     }
@@ -145,8 +137,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
         debug_js["RTON info"] = rton_info;
         debug << std::setw(4) << debug_js;
 
-        std::cerr << e.what() << std::endl
-                  << std::endl;
+        std::cerr << e.what() << std::endl;
 
         //remove unfinished file
         std::filesystem::path out_file;
@@ -156,6 +147,13 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
         output.close();
         std::filesystem::remove(out_file);
     }
+
+    std::chrono::time_point<std::chrono::steady_clock> time_end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_process = time_end - time_start;
+
+    std::cout << "Completed in " << time_process.count() << "s" << std::endl
+              << std::endl;
+
     return 0;
 }
 
@@ -163,7 +161,7 @@ int main(const int argc, const char *argv[]){
     std::cout << std::endl
               << "rton-json made by H3x4n1um" << std::endl
               << std::endl
-              << "Version: " << ver << " - " << architecture << " executable" << std::endl
+              << "Version: " << ver << " " << architecture << " executable" << std::endl
               << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
               << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl
               << std::endl;
