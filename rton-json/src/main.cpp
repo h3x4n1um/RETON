@@ -53,7 +53,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
 
         char header[5];
         input.read(header, 4);
-        header[4] = 0;
+        header[4] = '\0';
 
         if (strcmp(header, "RTON") == 0) in_file = RTON;
         else{
@@ -62,7 +62,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
                 json_fifo::json js = json_fifo::json::parse(input);
                 in_file = JSON;
             }
-            catch(json_fifo::json::exception &e){
+            catch(json_fifo::json::exception){
             }
         }
 

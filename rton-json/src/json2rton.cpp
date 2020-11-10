@@ -250,7 +250,7 @@ std::vector <uint8_t> encode_JSON(const json_fifo::json &js, std::unordered_map 
 
         res.push_back(CHUNK_TYPE::OBJECT_END);
     }
-    catch(json_fifo::json::exception &e){
+    catch(json_fifo::json::exception){
         throw std::logic_error(json_error);
     }
     return res;

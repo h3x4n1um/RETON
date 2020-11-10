@@ -5,7 +5,7 @@
 #include "include/RTON_number.hpp"
 
 template <class T>
-T get_data(const std::vector <uint8_t> &byte_array, std::size_t &pos){
+T get_raw_data(const std::vector <uint8_t> &byte_array, std::size_t &pos){
     std::size_t pre_pos = pos;
     pos += sizeof(T);
     std::vector<uint8_t> sub_byte_array(std::next(byte_array.begin(), pre_pos), std::next(byte_array.begin(), pos));
@@ -37,32 +37,32 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //int8_t
     case 0x8:{
-        return get_data<int8_t>(byte_array, pos);
+        return get_raw_data<int8_t>(byte_array, pos);
         break;
     }
     //uint8_t
     case 0xa:{
-        return get_data<uint8_t>(byte_array, pos);
+        return get_raw_data<uint8_t>(byte_array, pos);
         break;
     }
     //int16_t
     case 0x10:{
-        return get_data<int16_t>(byte_array, pos);
+        return get_raw_data<int16_t>(byte_array, pos);
         break;
     }
     //uint16_t
     case 0x12:{
-        return get_data<uint16_t>(byte_array, pos);
+        return get_raw_data<uint16_t>(byte_array, pos);
         break;
     }
     //int32_t
     case 0x20:{
-        return get_data<int32_t>(byte_array, pos);
+        return get_raw_data<int32_t>(byte_array, pos);
         break;
     }
     //float32
     case 0x22:{
-        float tmp = get_data<decltype(tmp)>(byte_array, pos);
+        float tmp = get_raw_data<decltype(tmp)>(byte_array, pos);
         if (std::isinf(tmp)) return tmp > 0 ? "inf" : "-inf";
         if (std::isnan(tmp)) return "nan";
         return tmp;
@@ -70,17 +70,17 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //uint32_t
     case 0x26:{
-        return get_data<uint32_t>(byte_array, pos);
+        return get_raw_data<uint32_t>(byte_array, pos);
         break;
     }
     //int64_t
     case 0x40:{
-        return get_data<int64_t>(byte_array, pos);
+        return get_raw_data<int64_t>(byte_array, pos);
         break;
     }
     //float64
     case 0x42:{
-        double tmp = get_data<decltype(tmp)>(byte_array, pos);
+        double tmp = get_raw_data<decltype(tmp)>(byte_array, pos);
         if (std::isinf(tmp)) return tmp > 0 ? "inf" : "-inf";
         if (std::isnan(tmp)) return "nan";
         return tmp;
@@ -88,7 +88,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //uint64_t
     case 0x46:{
-        return get_data<uint64_t>(byte_array, pos);
+        return get_raw_data<uint64_t>(byte_array, pos);
         break;
     }
     //string
@@ -112,7 +112,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //RTID
     case 0x83:{
-        uint8_t subset = get_data<decltype(subset)>(byte_array, pos);
+        uint8_t subset = get_raw_data<decltype(subset)>(byte_array, pos);
 
         switch (subset){
         case 0x2:{
@@ -125,7 +125,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
 
             uint64_t second_uid = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
             uint64_t first_uid = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
-            uint32_t third_uid = get_data<decltype(third_uid)>(byte_array, pos);
+            uint32_t third_uid = get_raw_data<decltype(third_uid)>(byte_array, pos);
 
             std::stringstream ss;
             ss << std::dec << first_uid << '.' << second_uid << '.' << std::hex << third_uid;
@@ -169,7 +169,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //array
     case 0x86:{
-        uint8_t arr_begin = get_data<decltype(arr_begin)>(byte_array, pos);
+        uint8_t arr_begin = get_raw_data<decltype(arr_begin)>(byte_array, pos);
 
         if (arr_begin == 0xfd){
             rton_info["List of chunks"][to_hex_string(pos-1)] = to_hex_string(arr_begin);
@@ -179,7 +179,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
             json_fifo::json arr = json_fifo::json::array();
             for (std::size_t i = 0; i < arr_size; ++i) arr.push_back(decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info));
 
-            uint8_t arr_end = get_data<decltype(arr_end)>(byte_array, pos);
+            uint8_t arr_end = get_raw_data<decltype(arr_end)>(byte_array, pos);
             if (arr_end != 0xfe) throw std::logic_error(chunk_error(pos, arr_end));
 
             rton_info["List of chunks"][to_hex_string(pos-1)] = to_hex_string(arr_end);
@@ -299,7 +299,7 @@ json_fifo::json decode_RTON(const std::vector <uint8_t> &byte_array, std::size_t
 }
 
 json_fifo::json rton2json(const std::vector <uint8_t> &byte_array, json_fifo::json &rton_info){
-    std::size_t pos = 8;//skip RTON
+    std::size_t pos = 8;//skip RTON and RTON version
     std::vector<std::string> array_0x91,
                              array_0x93;
     json_fifo::json res = decode_RTON(byte_array, pos, array_0x91, array_0x93, rton_info);
