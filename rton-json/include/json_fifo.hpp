@@ -1,7 +1,7 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
 #include <fifo_map.hpp>
+#include <nlohmann/json.hpp>
 
 namespace json_fifo{
     //a workaround to give to use fifo_map as map, we are just ignoring the 'less' compare
