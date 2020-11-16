@@ -3,4 +3,4 @@
 	url = https://github.com/nlohmann/json
 [submodule "rton-json/third_party/fifo_map"]
 	path = rton-json/third_party/fifo_map
-	url = https://github.com/nlohmann/fifo_map
+	url = https://github.com/h3x4n1um/fifo_map

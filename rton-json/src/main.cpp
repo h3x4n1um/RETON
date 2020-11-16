@@ -62,7 +62,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
                 json_fifo::json js = json_fifo::json::parse(input);
                 in_file = JSON;
             }
-            catch(json_fifo::json::exception){
+            catch(json_fifo::json::exception &e){
             }
         }
 
@@ -133,7 +133,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
         }
         }
     }
-    catch (const std::exception &e){
+    catch (std::exception &e){
         debug_js["RTON info"] = rton_info;
         debug << std::setw(4) << debug_js;
 
