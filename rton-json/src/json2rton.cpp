@@ -14,6 +14,8 @@ enum CHUNK_TYPE : uint8_t{
     RTID            = 0x83,
     OBJECT          = 0x85,
     ARRAY           = 0x86,
+    ASCII           = 0x90,
+    ASCII_ARRAY     = 0x91,
     UTF8            = 0x92,
     UTF8_ARRAY      = 0x93,
     ARRAY_BEGIN     = 0xfd,
@@ -134,8 +136,8 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
             res.push_back(CHUNK_TYPE::FLOAT64);
             res.insert(res.end(), byte_array.begin(), byte_array.end());
         }
-        //normal string
-        else{
+        //utf-8 string
+        if(get_utf8_size(temp) < temp.size()){
             if (map_0x93[temp] == 0){
                 rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::UTF8);
 
@@ -157,6 +159,29 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
 
                 res.push_back(CHUNK_TYPE::UTF8_ARRAY);
                 res.insert(res.end(), utf8_array_pos.begin(), utf8_array_pos.end());
+            }
+        }
+        //ascii string
+        else{
+            if (map_0x91[temp] == 0){
+                rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::ASCII);
+
+                std::vector <uint8_t> byte_size = uint64_t2uRTON_t(temp.size());
+
+                res.push_back(CHUNK_TYPE::ASCII);
+                res.insert(res.end(), byte_size.begin(), byte_size.end());
+                res.insert(res.end(), temp.begin(), temp.end());
+
+                rton_info["0x91 array"][to_hex_string(uint64_t2uRTON_t(map_0x91.size() - 1))] = temp;
+                map_0x91[temp] = map_0x91.size();
+            }
+            else{
+                rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::ASCII_ARRAY);
+
+                std::vector <uint8_t> ascii_array_pos = uint64_t2uRTON_t(map_0x91[temp] - 1);
+
+                res.push_back(CHUNK_TYPE::ASCII_ARRAY);
+                res.insert(res.end(), ascii_array_pos.begin(), ascii_array_pos.end());
             }
         }
         break;

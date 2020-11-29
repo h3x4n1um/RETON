@@ -1,5 +1,7 @@
 #include "include/rton2json.hpp"
 
+#include <sstream>
+
 #include "include/error.hpp"
 #include "include/rton-json.hpp"
 #include "include/RTON_number.hpp"

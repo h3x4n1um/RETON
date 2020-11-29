@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS
 		"${CMAKE_CXX_FLAGS}\
-		-Wall -Wextra -pedantic -Werror\
+		-Wall -Wextra -Werror -pedantic\
 		-static\
 		-s")
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")

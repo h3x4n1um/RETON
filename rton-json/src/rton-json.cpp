@@ -1,5 +1,8 @@
 #include "include/rton-json.hpp"
 
+#include <iomanip>
+#include <sstream>
+
 std::string to_hex_string(const uint64_t &q){
     std::stringstream ss;
     ss << "0x" << std::hex << q;
