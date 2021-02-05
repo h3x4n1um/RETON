@@ -161,7 +161,7 @@ int main(const int argc, const char *argv[]){
     std::cout << std::endl
               << "rton-json made by H3x4n1um" << std::endl
               << std::endl
-              << "Version: " << ver << " " << architecture << " executable" << std::endl
+              << "Version: " << ver << " " << architecture << std::endl
               << "Compiled on " << __DATE__ << " at " << __TIME__ << std::endl
               << "Credits: nlohmann for his awesome JSON parser and fifo_map" << std::endl
               << std::endl;

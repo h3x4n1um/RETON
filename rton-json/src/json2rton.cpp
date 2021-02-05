@@ -1,5 +1,6 @@
 #include "include/json2rton.hpp"
 
+#include <sstream>
 #include <regex>
 
 #include "include/error.hpp"
