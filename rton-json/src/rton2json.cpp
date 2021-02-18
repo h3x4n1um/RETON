@@ -287,7 +287,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
 
 json_fifo::json decode_RTON(const std::vector <uint8_t> &byte_array, std::size_t &pos, std::vector<std::string> &array_0x91, std::vector<std::string> &array_0x93, json_fifo::json &rton_info){
     std::size_t pre_pos = pos;
-    json_fifo::json res,
+    json_fifo::json res = json_fifo::json::object(),
                     js_key = decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info);
     while(js_key.size()){
         if(!js_key.is_string()) throw std::logic_error("Error! Key at " + to_hex_string(pre_pos) + " is not a string!!!");
