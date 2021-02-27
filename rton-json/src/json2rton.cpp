@@ -35,10 +35,10 @@ std::vector <uint8_t> set_raw_data(const T &val){
 std::size_t get_utf8_size(const std::string &q){
     std::size_t utf8_size = 0;
     for (uint8_t i : q){
-        if (i <= 0177) ++utf8_size;
-        if (i >= 0302 && i <= 0337) ++utf8_size;
-        if (i >= 0340 && i <= 0357) ++utf8_size;
-        if (i >= 0360 && i <= 0364) ++utf8_size;
+        if (i <= 0b01111111) ++utf8_size;
+        else if (i >= 0b11000010 && i <= 0b11011111) ++utf8_size;
+        else if (i >= 0b11100001 && i <= 0b11101111) ++utf8_size;
+        else if (i >= 0b11110000 && i <= 0b11110111) ++utf8_size;
     }
     return utf8_size;
 }
