@@ -57,7 +57,7 @@ Bytecode | Type | Note
 
 ### `0x24`, `0x28`, `0x44` and `0x48`
 
-* It reads 1-byte until it found byte that `>= 0x7f`
+* It reads 1-byte until it found byte that `<= 0x7f`
 
 * After that it does something like this pseudocode:
 

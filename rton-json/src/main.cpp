@@ -185,7 +185,7 @@ int main(int argc, char *argv[]){
     else {
         if (arg.size() == 2 && arg.back() == "--help") return help(arg);    // special case for help
 
-        for (int i = 1; i+1 < arg.size(); ++i){                             // skip arg.front() and arg.back() and get opt
+        for (uint64_t i = 1; i+1 < arg.size(); ++i){                             // skip arg.front() and arg.back() and get opt
             if (arg.at(i) == "--help") return help(arg);
             else if (arg.at(i) == "--noui") noui = true;
             else if (arg.at(i) == "--rton2json") file_type = RTON;
