@@ -6,18 +6,25 @@
 #include "include/rton-json.hpp"
 #include "include/rton2json.hpp"
 
-int help(const char *argv[]){
-    std::cout << "Usage:\t" << argv[0] << " [options]" << " <file or folder>" << std::endl
+enum FILE_TYPE {
+    JSON,
+    RTON,
+    UNKNOWN
+};
+
+int help(const std::vector <std::string> &arg){
+    std::cout << "Usage:\t" << arg.front() << " [options]" << " <file or folder>" << std::endl
               << std::endl
               << "Options:" << std::endl
               << "\t--help\t\tShow help" << std::endl
+              << "\t--noui\t\tSkip UI" << std::endl
               << "\t--rton2json\tForce covert RTON to JSON" << std::endl
-              << "\t--json2rton\tForce covert JSON to RTON" << std::endl;
-    std::cin.get();
+              << "\t--json2rton\tForce covert JSON to RTON" << std::endl
+              << std::endl;
     return 1;
 }
 
-int process_file(const std::filesystem::path &file_name, const int &argc, const char *argv[], json_fifo::json &json_list, json_fifo::json &rton_list){
+int process_file(const std::vector <std::string> &arg, const std::filesystem::path &file_name, FILE_TYPE file_type, reton::fifo_json &json_list, reton::fifo_json &rton_list){
     std::chrono::time_point<std::chrono::steady_clock> time_start = std::chrono::steady_clock::now();
 
     std::ifstream input;
@@ -26,43 +33,35 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
     std::cout << "Processing file " << file_name;
 
     //info
-    json_fifo::json debug_js;
+    reton::fifo_json debug_js;
 
     debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
-    debug_js["Info"]["Executable"] = argv[0];
+    debug_js["Info"]["Executable"] = arg.front();
     debug_js["Info"]["Version"] = ver;
     debug_js["Info"]["Compile time"] = std::string(__DATE__) + ' ' + __TIME__;
 
     //detect json or rton or unknown
-    enum FILE_TYPE{
-        JSON,
-        RTON,
-        UNKNOWN
-    } in_file = UNKNOWN;
-
-    if (argc == 3){
+    if (file_type != UNKNOWN){
         debug_js["Info"]["Mode"] = "Manual";
-        if (strcmp(argv[1], "--rton2json") == 0) in_file = RTON;
-        else if (strcmp(argv[1], "--json2rton") == 0) in_file = JSON;
-        debug_js["Info"]["Option"] = argv[1];
+        debug_js["Info"]["Option"] = arg;
     }
     else{
         debug_js["Info"]["Mode"] = "Auto";
 
-        input.open(file_name, std::ios_base::binary);
+        input.open(file_name, std::ios::binary);
 
         char header[5];
         input.read(header, 4);
         header[4] = '\0';
 
-        if (strcmp(header, "RTON") == 0) in_file = RTON;
+        if (strcmp(header, "RTON") == 0) file_type = RTON;
         else{
             try{
                 input.seekg(0);
-                json_fifo::json js = json_fifo::json::parse(input);
-                in_file = JSON;
+                reton::fifo_json js = reton::fifo_json::parse(input);
+                file_type = JSON;
             }
-            catch(json_fifo::json::exception &e){
+            catch(reton::fifo_json::exception &e){
             }
         }
 
@@ -71,7 +70,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
     debug_js["Info"]["File"] = file_name.string();
 
     //init RTON Stats
-    json_fifo::json rton_info;
+    reton::fifo_json rton_info;
 
     rton_info["RTON version"] = 1; //not sure if it ever higher than 1
     rton_info["List of chunks"]["Offset"] = "Chunk type";
@@ -79,7 +78,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
     rton_info["0x93 array"]["Unsigned RTON number"] = "UTF-8 string";
 
     try{
-        switch(in_file){
+        switch(file_type){
         case JSON:{
             std::filesystem::create_directory(file_name.parent_path() / "log");
             debug.open((file_name.parent_path() / "log" / file_name.filename()).string() + "_log.json");
@@ -88,11 +87,11 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
             json_list["JSON files"].push_back(file_name.string());
 
             input.open(file_name);
-            json_fifo::json json_file = json_fifo::json::parse(input);
+            reton::fifo_json json_file = reton::fifo_json::parse(input);
             input.close();
 
             std::filesystem::create_directory(file_name.parent_path() / "json2rton");
-            output.open((file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton", std::ios_base::binary);
+            output.open((file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton", std::ios::binary);
             std::vector <uint8_t> result = json2rton(json_file, rton_info);
             output.write(reinterpret_cast <const char*>(result.data()), result.size());
             output.close();
@@ -109,7 +108,7 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
             std::cout << " - RTON Detected" << std::endl;
             rton_list["RTON files"].push_back(file_name.string());
 
-            input.open(file_name, std::ios_base::binary);
+            input.open(file_name, std::ios::binary);
             std::vector <uint8_t> raw_file;
             std::for_each(std::istreambuf_iterator<char>(input),
                           std::istreambuf_iterator<char>(),
@@ -141,8 +140,8 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
 
         //remove unfinished file
         std::filesystem::path out_file;
-        if (in_file == RTON) out_file = (file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json";
-        else out_file = (file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton";
+        if (file_type == RTON) out_file = (file_name.parent_path() / "rton2json" / file_name.stem()).string() + ".json";
+        else if (file_type == JSON) out_file = (file_name.parent_path() / "json2rton" / file_name.stem()).string() + ".rton";
 
         output.close();
         std::filesystem::remove(out_file);
@@ -157,7 +156,15 @@ int process_file(const std::filesystem::path &file_name, const int &argc, const 
     return 0;
 }
 
-int main(const int argc, const char *argv[]){
+int main(int argc, char *argv[]){
+    // init arg
+    std::vector <std::string> arg;
+    for (int i = 0; i < argc; ++i) arg.push_back(argv[i]);
+
+    // init arg default value
+    bool noui = false;
+    FILE_TYPE file_type = UNKNOWN;
+
     std::cout << std::endl
               << "rton-json made by H3x4n1um" << std::endl
               << std::endl
@@ -167,46 +174,46 @@ int main(const int argc, const char *argv[]){
               << std::endl;
 
     std::filesystem::path path;
-    switch (argc){
-    case 1:{
+    if (arg.size() == 1) {
         std::string temp;
         std::cout << "Enter file or folder path: ";
         getline(std::cin, temp);
         path = temp;
         std::cout << std::endl;
-        break;
     }
-    case 2:{
-        if (strcmp(argv[1], "--help") == 0) return help(argv);
-        path = argv[1];
-        break;
-    }
-    case 3:{
-        path = argv[2];
-        if (!(strcmp(argv[1], "--rton2json") == 0 || strcmp(argv[1], "--json2rton") == 0)) return help(argv);
-        break;
-    }
-    default:{
-        return help(argv);
-    }
+    // arg parser, simple but it works :P
+    else {
+        if (arg.size() == 2 && arg.back() == "--help") return help(arg);    // special case for help
+
+        for (int i = 1; i+1 < arg.size(); ++i){                             // skip arg.front() and arg.back() and get opt
+            if (arg.at(i) == "--help") return help(arg);
+            else if (arg.at(i) == "--noui") noui = true;
+            else if (arg.at(i) == "--rton2json") file_type = RTON;
+            else if (arg.at(i) == "--json2rton") file_type = JSON;
+            // invalid arg :P
+            else return help(arg);
+        }
+
+        path = arg.back();
     }
 
     if (!(std::filesystem::is_regular_file(path) || std::filesystem::is_directory(path))){
         std::cerr << "Error! Can't find file or folder " << path << "!!!" << std::endl;
-        std::cin.get();
+        if (!noui) std::cin.get();
+        else std::cout << std::endl;
         return 1;
     }
 
-    json_fifo::json rton_list, json_list;
+    reton::fifo_json rton_list, json_list;
 
     if (std::filesystem::is_regular_file(path)){
-        process_file(path, argc, argv, json_list, rton_list);
+        process_file(arg, path, file_type, json_list, rton_list);
         path = path.parent_path();
     }
     else{
         for (std::filesystem::directory_entry file : std::filesystem::directory_iterator(path)){
             if (std::filesystem::is_regular_file(file)){
-                process_file(file.path(), argc, argv, json_list, rton_list);
+                process_file(arg, file.path(), file_type, json_list, rton_list);
             }
         }
     }
@@ -224,6 +231,7 @@ int main(const int argc, const char *argv[]){
     result.close();
 
     std::cout << "Finished" << std::endl;
-    std::cin.get();
+    if (!noui) std::cin.get();
+    else std::cout << std::endl;
     return 0;
 }

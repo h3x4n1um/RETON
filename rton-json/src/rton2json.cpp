@@ -21,7 +21,7 @@ std::vector <uint8_t> get_uRTON_t(const std::vector<uint8_t> &byte_array, std::s
     return std::vector <uint8_t>(std::next(byte_array.begin(), pre_pos), std::next(byte_array.begin(), pos));
 }
 
-json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::size_t &pos, std::vector<std::string> &array_0x91, std::vector<std::string> &array_0x93, json_fifo::json &rton_info){
+reton::fifo_json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::size_t &pos, std::vector<std::string> &array_0x91, std::vector<std::string> &array_0x93, reton::fifo_json &rton_info){
     uint8_t chunk_type = byte_array.at(pos);
     ++pos;
     rton_info["List of chunks"][to_hex_string(pos-1)] = to_hex_string(chunk_type);
@@ -116,7 +116,11 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     case 0x83:{
         uint8_t subset = get_raw_data<decltype(subset)>(byte_array, pos);
 
-        switch (subset){
+        switch(subset){
+        case 0x0:{
+            return "RTID()";
+            break;
+        }
         case 0x2:{
             uint64_t buffer = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
             buffer = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
@@ -178,7 +182,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
 
             std::size_t arr_size = uRTON_t2uint64_t(get_uRTON_t(byte_array, pos));
 
-            json_fifo::json arr = json_fifo::json::array();
+            reton::fifo_json arr = reton::fifo_json::array();
             for (std::size_t i = 0; i < arr_size; ++i) arr.push_back(decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info));
 
             uint8_t arr_end = get_raw_data<decltype(arr_end)>(byte_array, pos);
@@ -232,7 +236,7 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
     //end of object
     case 0xFF:{
-        return json_fifo::json();
+        return reton::fifo_json();
         break;
     }
 
@@ -285,9 +289,9 @@ json_fifo::json decode_RTON_chunk(const std::vector <uint8_t> &byte_array, std::
     }
 }
 
-json_fifo::json decode_RTON(const std::vector <uint8_t> &byte_array, std::size_t &pos, std::vector<std::string> &array_0x91, std::vector<std::string> &array_0x93, json_fifo::json &rton_info){
+reton::fifo_json decode_RTON(const std::vector <uint8_t> &byte_array, std::size_t &pos, std::vector<std::string> &array_0x91, std::vector<std::string> &array_0x93, reton::fifo_json &rton_info){
     std::size_t pre_pos = pos;
-    json_fifo::json res = json_fifo::json::object(),
+    reton::fifo_json res = reton::fifo_json::object(),
                     js_key = decode_RTON_chunk(byte_array, pos, array_0x91, array_0x93, rton_info);
     while(js_key.size()){
         if(!js_key.is_string()) throw std::logic_error("Error! Key at " + to_hex_string(pre_pos) + " is not a string!!!");
@@ -300,11 +304,11 @@ json_fifo::json decode_RTON(const std::vector <uint8_t> &byte_array, std::size_t
     return res;
 }
 
-json_fifo::json rton2json(const std::vector <uint8_t> &byte_array, json_fifo::json &rton_info){
+reton::fifo_json rton2json(const std::vector <uint8_t> &byte_array, reton::fifo_json &rton_info){
     std::size_t pos = 8;//skip RTON and RTON version
     std::vector<std::string> array_0x91,
                              array_0x93;
-    json_fifo::json res = decode_RTON(byte_array, pos, array_0x91, array_0x93, rton_info);
+    reton::fifo_json res = decode_RTON(byte_array, pos, array_0x91, array_0x93, rton_info);
 
     if (pos == byte_array.size()) std::cout << "Missing \"DONE\" at EOF?" << std::endl;
     else{

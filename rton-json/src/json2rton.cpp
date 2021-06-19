@@ -43,17 +43,17 @@ std::size_t get_utf8_size(const std::string &q){
     return utf8_size;
 }
 
-std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordered_map <std::string, uint64_t> &map_0x91, std::unordered_map <std::string, uint64_t> &map_0x93, std::size_t &pos, json_fifo::json &rton_info){
+std::vector <uint8_t> encode_JSON_chunk(const reton::fifo_json &js, std::unordered_map <std::string, uint64_t> &map_0x91, std::unordered_map <std::string, uint64_t> &map_0x93, std::size_t &pos, reton::fifo_json &rton_info){
     std::vector <uint8_t> res;
 
     switch(js.type()){
-    case json_fifo::json::value_t::null:{
+    case reton::fifo_json::value_t::null:{
         rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(null);
 
         res.push_back(CHUNK_TYPE::null);
         break;
     }
-    case json_fifo::json::value_t::boolean:{
+    case reton::fifo_json::value_t::boolean:{
         bool temp = js.get<decltype(temp)>();
 
         rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(temp);
@@ -61,57 +61,72 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         res.push_back(temp);
         break;
     }
-    case json_fifo::json::value_t::string:{
+    case reton::fifo_json::value_t::string:{
         std::string temp = js.get<decltype(temp)>();
         //rtid
-        if (regex_match(temp, std::regex("RTID(.*@.*)"))){
+        if (regex_match(temp, std::regex(R"(RTID\(.*@?.*\))"))) {
             res.push_back(CHUNK_TYPE::RTID);
 
             //delete "RTID(" and ")"
             temp.erase(std::prev(temp.end(), 1));
             temp.erase(0, 5);
 
-            std::string s1 = temp.substr(temp.find("@") + 1),
-                        s2 = temp.substr(0, temp.find("@"));
+            std::string s1, s2;
 
-            uint8_t subset = 0x83;
-            if (regex_match(s2, std::regex("\\d+\\.\\d+\\.[0-9a-fA-F]+"))) subset = 0x2;
+            uint8_t subset;
+            if (temp.size() == 0) subset = 0x0;
+            else {
+                s1 = temp.substr(temp.find("@") + 1);
+                s2 = temp.substr(0, temp.find("@"));
 
-            rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::RTID*0x100 + subset);
+                if (regex_match(s2, std::regex(R"(\d+\.\d+\.[\da-f]{8})", std::regex_constants::icase))) subset = 0x2;
+                else subset = 0x3;
+            }
+
+            rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::RTID*0x100+subset);
 
             res.push_back(subset);
 
-            std::vector<uint8_t> s1_utf8_size = uint64_t2uRTON_t(get_utf8_size(s1)),
-                                 s1_size = uint64_t2uRTON_t(s1.size());
+            if (subset == 0x2 || subset == 0x3) {
+                std::vector<uint8_t> s1_utf8_size = uint64_t2uRTON_t(get_utf8_size(s1));
+                std::vector<uint8_t> s1_size = uint64_t2uRTON_t(s1.size());
 
-            res.insert(res.end(), s1_utf8_size.begin(), s1_utf8_size.end());
-            res.insert(res.end(), s1_size.begin(), s1_size.end());
-            res.insert(res.end(), s1.begin(), s1.end());
+                res.insert(res.end(), s1_utf8_size.begin(), s1_utf8_size.end());
+                res.insert(res.end(), s1_size.begin(), s1_size.end());
+                res.insert(res.end(), s1.begin(), s1.end());
+            }
 
-            if (subset == 0x2){
+            switch (subset){
+            case 0x0: {
+                break;
+            }
+            case 0x2:{
                 std::stringstream raw_ss(s2), ss;
                 std::string tmp_str;
                 uint64_t uid1, uid2;
                 uint32_t uid3;
 
-                while(getline(raw_ss, tmp_str, '.')) ss << tmp_str << " ";
+                while (getline(raw_ss, tmp_str, '.')) ss << tmp_str << " ";
                 ss >> std::dec >> uid1 >> uid2 >> std::hex >> uid3;
 
                 std::vector <uint8_t> byte_array_uid1 = uint64_t2uRTON_t(uid1),
-                                      byte_array_uid2 = uint64_t2uRTON_t(uid2),
-                                      byte_array_uid3 = set_raw_data(uid3);
+                    byte_array_uid2 = uint64_t2uRTON_t(uid2),
+                    byte_array_uid3 = set_raw_data(uid3);
 
                 res.insert(res.end(), byte_array_uid2.begin(), byte_array_uid2.end());
                 res.insert(res.end(), byte_array_uid1.begin(), byte_array_uid1.end());
                 res.insert(res.end(), byte_array_uid3.begin(), byte_array_uid3.end());
+                break;
             }
-            else if (subset == 0x3){
-                std::vector<uint8_t> s2_utf8_size = uint64_t2uRTON_t(get_utf8_size(s2)),
-                                     s2_size = uint64_t2uRTON_t(s2.size());
+            case 0x3:{
+                std::vector<uint8_t> s2_utf8_size = uint64_t2uRTON_t(get_utf8_size(s2));
+                std::vector<uint8_t> s2_size = uint64_t2uRTON_t(s2.size());
 
                 res.insert(res.end(), s2_utf8_size.begin(), s2_utf8_size.end());
                 res.insert(res.end(), s2_size.begin(), s2_size.end());
                 res.insert(res.end(), s2.begin(), s2.end());
+                break;
+            }
             }
         }
         //nan
@@ -138,7 +153,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
             res.insert(res.end(), byte_array.begin(), byte_array.end());
         }
         //utf-8 string
-        if(get_utf8_size(temp) < temp.size()){
+        else if(get_utf8_size(temp) < temp.size()){
             if (map_0x93[temp] == 0){
                 rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::UTF8);
 
@@ -187,7 +202,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         }
         break;
     }
-    case json_fifo::json::value_t::number_integer:{
+    case reton::fifo_json::value_t::number_integer:{
         rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::RTON_t);
 
         int64_t temp = js.get<decltype(temp)>();
@@ -197,7 +212,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         res.insert(res.end(), byte_array.begin(), byte_array.end());
         break;
     }
-    case json_fifo::json::value_t::number_unsigned:{
+    case reton::fifo_json::value_t::number_unsigned:{
         rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::uRTON_t);
 
         uint64_t temp = js.get<decltype(temp)>();
@@ -207,7 +222,7 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         res.insert(res.end(), byte_array.begin(), byte_array.end());
         break;
     }
-    case json_fifo::json::value_t::number_float:{
+    case reton::fifo_json::value_t::number_float:{
         rton_info["List of chunks"][to_hex_string(pos)] = to_hex_string(CHUNK_TYPE::FLOAT64);
 
         double temp = js.get<decltype(temp)>();
@@ -217,18 +232,18 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
         res.insert(res.end(), byte_array.begin(), byte_array.end());
         break;
     }
-    case json_fifo::json::value_t::object:{
+    case reton::fifo_json::value_t::object:{
         std::size_t tmp_pos = pos;
         rton_info["List of chunks"][to_hex_string(tmp_pos)] = to_hex_string(CHUNK_TYPE::OBJECT);
         ++tmp_pos;
 
-        std::vector <uint8_t> byte_array = encode_JSON(js, map_0x91, map_0x93, tmp_pos, rton_info);
+        std::vector <uint8_t> byte_array = encode_JSON(js, tmp_pos, map_0x91, map_0x93, rton_info);
 
         res.push_back(CHUNK_TYPE::OBJECT);
         res.insert(res.end(), byte_array.begin(), byte_array.end());
         break;
     }
-    case json_fifo::json::value_t::array:{
+    case reton::fifo_json::value_t::array:{
         std::size_t tmp_pos = pos;
 
         rton_info["List of chunks"][to_hex_string(tmp_pos)] = to_hex_string(CHUNK_TYPE::ARRAY);
@@ -261,10 +276,10 @@ std::vector <uint8_t> encode_JSON_chunk(const json_fifo::json &js, std::unordere
     return res;
 }
 
-std::vector <uint8_t> encode_JSON(const json_fifo::json &js, std::unordered_map <std::string, uint64_t> &map_0x91, std::unordered_map <std::string, uint64_t> &map_0x93, std::size_t &pos, json_fifo::json &rton_info){
+std::vector <uint8_t> encode_JSON(const reton::fifo_json &js, std::size_t& pos, std::unordered_map <std::string, uint64_t> &map_0x91, std::unordered_map <std::string, uint64_t> &map_0x93, reton::fifo_json &rton_info){
     std::vector <uint8_t> res;
     try{
-        for (std::pair <std::string, json_fifo::json> i : js.get<std::map <std::string, json_fifo::json>>()){
+        for (std::pair <std::string, reton::fifo_json> i : js.get<nlohmann::fifo_map <std::string, reton::fifo_json>>()){
             std::vector <uint8_t> tmp = encode_JSON_chunk(i.first, map_0x91, map_0x93, pos, rton_info);
             res.insert(res.end(), tmp.begin(), tmp.end());
 
@@ -276,20 +291,20 @@ std::vector <uint8_t> encode_JSON(const json_fifo::json &js, std::unordered_map 
 
         res.push_back(CHUNK_TYPE::OBJECT_END);
     }
-    catch(json_fifo::json::exception &e){
+    catch(reton::fifo_json::exception &e){
         throw std::logic_error(json_error);
     }
     return res;
 }
 
-std::vector <uint8_t> json2rton(const json_fifo::json &js, json_fifo::json &rton_info){
+std::vector <uint8_t> json2rton(const reton::fifo_json &js, reton::fifo_json &rton_info){
     std::size_t pos = 8;
     std::unordered_map <std::string, uint64_t> map_0x91,
                                                map_0x93;
     std::vector <uint8_t> res = {'R', 'T', 'O', 'N',
                                 0x1, 0x0, 0x0, 0x0,
                                 'D', 'O', 'N', 'E'},
-                          rton = encode_JSON(js, map_0x91, map_0x93, pos, rton_info);
+                          rton = encode_JSON(js, pos, map_0x91, map_0x93, rton_info);
     res.insert(std::next(res.begin(), 8), rton.begin(), rton.end());
     return res;
 }
