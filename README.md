@@ -63,15 +63,19 @@ Bytecode | Type | Note
 
     ```cpp
     uint64_t uRTON_t2uint64_t(std::vector <uint8_t> q){
-		if (q.size() == 1 && q[0] > 0x7f) return UINT64_MAX; //return max when RTON number has 1 byte and > 0x7f
-		uint64_t near_last_byte, last_byte = 0;
-		for (; q.size() > 0; q.pop_back()){
-			near_last_byte = q[q.size() - 1];
-			if (last_byte % 2 == 0) near_last_byte &= 0x7f;
-			last_byte /= 2;
-			last_byte = near_last_byte + last_byte * 0x100;
+		if (q.size() == 1 && q.back() > 0x7f) return UINT64_MAX; //return max when RTON number has 1 byte and > 0x7f
+
+		uint64_t res = 0;
+		while(q.size()){
+			uint64_t last_byte = q.back();
+			q.pop_back();
+
+			if (res%2 == 0) last_byte &= 0x7f;
+			res /= 2;
+			res = res*0x100+last_byte;
 		}
-		return last_byte;
+
+		return res;
 	}
     ```
 
@@ -124,26 +128,21 @@ Bytecode | Type | Note
 
 * `0x83` begins the RTID (RTON ID???) of RTON (cross-reference???)
 
-* It has 2 subsets (`0x2` and `0x3`)
+* It has 3 subsets (`0x0`, `0x2` and `0x3`)
 
-#### `0x3` Subset
+#### `0x0` Subset
 
 ```
-83 03 [L1] [L2] [string] [L3] [L4] [string 2]
+83 00
 ```
 
-* Format: **RTID(`[string 2]`@`[string]`)**
-
-* After `0x8303` is 2 strings format: `[L1] [L2] [string]` and `[L3] [L4] [string 2]` same as `0x82`
+* Format: **RTID()** (this is just my assumption, it may not be correct)
 
 * Example:
 
     ```
     52 54 4F 4E 01 00 00 00
-        90 0C 52 54 49 44 20 45 78 61 6D 70 6C 65
-        83 03
-            09 09 31 73 74 53 74 72 69 6E 67
-            09 09 32 6E 64 53 74 72 69 6E 67
+        90 09 6D 5F 74 68 69 73 50 74 72 83 00
     FF
     44 4F 4E 45
     ```
@@ -152,7 +151,7 @@ Bytecode | Type | Note
 
     ```JSON
     {
-        "RTID Example": "RTID(2ndString@1stString)"
+        "m_thisPtr": "RTID()"
     }
     ```
 
@@ -186,6 +185,36 @@ Bytecode | Type | Note
     ```JSON
     {
         "m_thisPtr": "RTID(1.0.6d7ba77d@QuestsActive)"
+    }
+    ```
+
+#### `0x3` Subset
+
+```
+83 03 [L1] [L2] [string] [L3] [L4] [string 2]
+```
+
+* Format: **RTID(`[string 2]`@`[string]`)**
+
+* After `0x8303` is 2 strings format: `[L1] [L2] [string]` and `[L3] [L4] [string 2]` same as `0x82`
+
+* Example:
+
+    ```
+    52 54 4F 4E 01 00 00 00
+        90 0C 52 54 49 44 20 45 78 61 6D 70 6C 65
+        83 03
+            09 09 31 73 74 53 74 72 69 6E 67
+            09 09 32 6E 64 53 74 72 69 6E 67
+    FF
+    44 4F 4E 45
+    ```
+
+* JSON decode:
+
+    ```JSON
+    {
+        "RTID Example": "RTID(2ndString@1stString)"
     }
     ```
 
@@ -340,7 +369,7 @@ Bytecode | Type | Note
 
 ## TODO
 
-* **Find the correct format of 0x8302**
+* **Find the correct format of 0x8300 and 0x8302**
 
 * Support regex input e.g: `rton-json *.rton`
 
