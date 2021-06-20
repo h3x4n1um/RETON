@@ -35,15 +35,15 @@ int process_file(const std::vector <std::string> &arg, const std::filesystem::pa
     //info
     reton::fifo_json debug_js;
 
-    debug_js["Info"]["Log"] = "This log file created by rton-json made by H3x4n1um";
-    debug_js["Info"]["Executable"] = arg.front();
-    debug_js["Info"]["Version"] = ver;
-    debug_js["Info"]["Compile time"] = std::string(__DATE__) + ' ' + __TIME__;
+    debug_js["Info"]["Log"]             = "This log file created by rton-json made by H3x4n1um";
+    debug_js["Info"]["Executable"]      = arg.front();
+    debug_js["Info"]["Version"]         = ver;
+    debug_js["Info"]["Compile time"]    = std::string(__DATE__) + ' ' + __TIME__;
+    debug_js["Info"]["Options"]         = arg;
 
     //detect json or rton or unknown
     if (file_type != UNKNOWN){
         debug_js["Info"]["Mode"] = "Manual";
-        debug_js["Info"]["Option"] = arg;
     }
     else{
         debug_js["Info"]["Mode"] = "Auto";
@@ -72,8 +72,8 @@ int process_file(const std::vector <std::string> &arg, const std::filesystem::pa
     //init RTON Stats
     reton::fifo_json rton_info;
 
-    rton_info["RTON version"] = 1; //not sure if it ever higher than 1
-    rton_info["List of chunks"]["Offset"] = "Chunk type";
+    rton_info["RTON version"]                       = 1;                //not sure if it ever higher than 1
+    rton_info["List of chunks"]["Offset"]           = "Chunk type";
     rton_info["0x91 array"]["Unsigned RTON number"] = "String";
     rton_info["0x93 array"]["Unsigned RTON number"] = "UTF-8 string";
 
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]){
     else {
         if (arg.size() == 2 && arg.back() == "--help") return help(arg);    // special case for help
 
-        for (uint64_t i = 1; i+1 < arg.size(); ++i){                             // skip arg.front() and arg.back() and get opt
+        for (uint64_t i = 1; i+1 < arg.size(); ++i){                        // skip arg.front() and arg.back() and get opt
             if (arg.at(i) == "--help") return help(arg);
             else if (arg.at(i) == "--noui") noui = true;
             else if (arg.at(i) == "--rton2json") file_type = RTON;

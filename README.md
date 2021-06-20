@@ -13,7 +13,7 @@ Bytecode | Type | Note
 `0x0` | false |
 `0x1` | true |
 `0x8` | int8_t | int 8 bit
-`0x9` | 0 | 0 int int8_t?
+`0x9` | 0 | 0 in int8_t?
 `0xa` | uint8_t | unsigned int 8 bit
 `0xb` | 0 | 0 in uint8_t?
 `0x10` | int16_t | int 16 bit

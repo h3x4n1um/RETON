@@ -64,22 +64,18 @@ std::vector <uint8_t> encode_JSON_chunk(const reton::fifo_json &js, std::unorder
     case reton::fifo_json::value_t::string:{
         std::string temp = js.get<decltype(temp)>();
         //rtid
-        if (regex_match(temp, std::regex(R"(RTID\(.*@?.*\))"))) {
+        std::smatch match_result;
+        if (regex_match(temp, match_result, std::regex(R"(RTID\((?:(.*)@(.*))?\))"))) {
             res.push_back(CHUNK_TYPE::RTID);
 
-            //delete "RTID(" and ")"
-            temp.erase(std::prev(temp.end(), 1));
-            temp.erase(0, 5);
-
             std::string s1, s2;
-
             uint8_t subset;
-            if (temp.size() == 0) subset = 0x0;
+            if (match_result[0] == "RTID()") subset = 0x0;
             else {
-                s1 = temp.substr(temp.find("@") + 1);
-                s2 = temp.substr(0, temp.find("@"));
+                s1 = match_result[2];
+                s2 = match_result[1];
 
-                if (regex_match(s2, std::regex(R"(\d+\.\d+\.[\da-f]{8})", std::regex_constants::icase))) subset = 0x2;
+                if (regex_match(s2, match_result, std::regex(R"((\d+)\.(\d+)\.([\da-f]{8}))", std::regex_constants::icase))) subset = 0x2;
                 else subset = 0x3;
             }
 
@@ -87,31 +83,25 @@ std::vector <uint8_t> encode_JSON_chunk(const reton::fifo_json &js, std::unorder
 
             res.push_back(subset);
 
-            if (subset == 0x2 || subset == 0x3) {
+            switch (subset){
+            case 0x0: {
+                break;
+            }
+            case 0x2:{
                 std::vector<uint8_t> s1_utf8_size = uint64_t2uRTON_t(get_utf8_size(s1));
                 std::vector<uint8_t> s1_size = uint64_t2uRTON_t(s1.size());
 
                 res.insert(res.end(), s1_utf8_size.begin(), s1_utf8_size.end());
                 res.insert(res.end(), s1_size.begin(), s1_size.end());
                 res.insert(res.end(), s1.begin(), s1.end());
-            }
 
-            switch (subset){
-            case 0x0: {
-                break;
-            }
-            case 0x2:{
-                std::stringstream raw_ss(s2), ss;
-                std::string tmp_str;
-                uint64_t uid1, uid2;
-                uint32_t uid3;
+                uint64_t uid1 = std::stoull(match_result[1]);
+                uint64_t uid2 = std::stoull(match_result[2]);
+                uint32_t uid3 = std::stoul(match_result[3], 0, 16);
 
-                while (getline(raw_ss, tmp_str, '.')) ss << tmp_str << " ";
-                ss >> std::dec >> uid1 >> uid2 >> std::hex >> uid3;
-
-                std::vector <uint8_t> byte_array_uid1 = uint64_t2uRTON_t(uid1),
-                    byte_array_uid2 = uint64_t2uRTON_t(uid2),
-                    byte_array_uid3 = set_raw_data(uid3);
+                std::vector <uint8_t> byte_array_uid1 = uint64_t2uRTON_t(uid1);
+                std::vector <uint8_t> byte_array_uid2 = uint64_t2uRTON_t(uid2);
+                std::vector <uint8_t> byte_array_uid3 = set_raw_data(uid3);
 
                 res.insert(res.end(), byte_array_uid2.begin(), byte_array_uid2.end());
                 res.insert(res.end(), byte_array_uid1.begin(), byte_array_uid1.end());
@@ -119,6 +109,13 @@ std::vector <uint8_t> encode_JSON_chunk(const reton::fifo_json &js, std::unorder
                 break;
             }
             case 0x3:{
+                std::vector<uint8_t> s1_utf8_size = uint64_t2uRTON_t(get_utf8_size(s1));
+                std::vector<uint8_t> s1_size = uint64_t2uRTON_t(s1.size());
+
+                res.insert(res.end(), s1_utf8_size.begin(), s1_utf8_size.end());
+                res.insert(res.end(), s1_size.begin(), s1_size.end());
+                res.insert(res.end(), s1.begin(), s1.end());
+
                 std::vector<uint8_t> s2_utf8_size = uint64_t2uRTON_t(get_utf8_size(s2));
                 std::vector<uint8_t> s2_size = uint64_t2uRTON_t(s2.size());
 
@@ -299,12 +296,13 @@ std::vector <uint8_t> encode_JSON(const reton::fifo_json &js, std::size_t& pos, 
 
 std::vector <uint8_t> json2rton(const reton::fifo_json &js, reton::fifo_json &rton_info){
     std::size_t pos = 8;
-    std::unordered_map <std::string, uint64_t> map_0x91,
-                                               map_0x93;
-    std::vector <uint8_t> res = {'R', 'T', 'O', 'N',
-                                0x1, 0x0, 0x0, 0x0,
-                                'D', 'O', 'N', 'E'},
-                          rton = encode_JSON(js, pos, map_0x91, map_0x93, rton_info);
+    std::unordered_map <std::string, uint64_t> map_0x91, map_0x93;
+    std::vector <uint8_t> res = {
+        'R', 'T', 'O', 'N',
+        0x1, 0x0, 0x0, 0x0,
+        'D', 'O', 'N', 'E'
+    };
+    std::vector <uint8_t> rton = encode_JSON(js, pos, map_0x91, map_0x93, rton_info);
     res.insert(std::next(res.begin(), 8), rton.begin(), rton.end());
     return res;
 }
